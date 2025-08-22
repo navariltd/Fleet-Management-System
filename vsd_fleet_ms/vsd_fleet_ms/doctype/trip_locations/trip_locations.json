@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{description}",
  "creation": "2023-05-04 12:36:53.540160",
  "default_view": "List",
  "doctype": "DocType",
@@ -118,10 +119,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-05-31 11:50:03.299923",
+ "modified": "2025-08-22 02:16:39.014585",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Trip Locations",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -137,6 +139,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

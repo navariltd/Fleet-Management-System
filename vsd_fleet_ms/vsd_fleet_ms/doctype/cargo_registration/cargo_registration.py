@@ -56,7 +56,7 @@ def create_sales_invoice(doc, rows):
             item = frappe._dict({
                     "item_code": row["service_item"],
                     "qty": row.get("net_weight_tonne"),
-                    "uom": row["bill_uom"],
+                    "uom": row.get("bill_uom", "kg"), # Same as net_weight UOM
                     "rate": row["rate"],
                     "description": description,
                     "cargo_id": row.get("name"),
@@ -68,7 +68,7 @@ def create_sales_invoice(doc, rows):
             item = frappe._dict({
                 "item_code": row["service_item"],
                 "qty": 1,
-                "uom": row["bill_uom"],
+                "uom": row.get("bill_uom", "kg"), # Same as net_weight UOM
                 "rate": row["rate"],
                 "description": description,
                 "cargo_id": row.get("name"),
@@ -85,6 +85,7 @@ def create_sales_invoice(doc, rows):
             posting_date=nowdate(),
             company=doc.company,
             items=items,
+            custom_invoice_no=doc.name
         ),
     )
 

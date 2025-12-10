@@ -46,6 +46,8 @@ class Trips(Document):
     def validate(self):
         if self.transporter_type == "In House":
             self.validate_fuel_requests()
+
+        self.validate_grn_before_completion()
         
         # self.set_permits()
 
@@ -201,6 +203,17 @@ class Trips(Document):
             
             if row.request_status == "Approved" and not row.journal_entry:
                 frappe.throw("<b>All approved fund requests must have a Journal Entry before submitting the trip</b>")
+
+    #This is to validate that GRN is linked before setting trip as Completed
+    def validate_grn_before_completion(self):
+        """Ensure GRN is linked before setting trip as Completed."""
+        if self.trip_status == "Completed":
+            if not self.reference_doctype or not self.reference_docname:
+                frappe.throw("You must link a Goods Receive Note before marking the trip as Completed.")
+
+            if self.reference_doctype != "Goods Receipt Note":
+                frappe.throw("Only a Goods Receive Note can be linked when Trip Status is Completed.")
+
 
 
 @frappe.whitelist()

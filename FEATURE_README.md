@@ -48,19 +48,6 @@ cd /home/muchemi/frappe-bench/apps/vsd_fleet_ms
 ./install_invoice_feature.sh
 ```
 
-### Testing
-
-```bash
-# Run automated tests
-bench execute vsd_fleet_ms.tests.test_invoice_automation.run_tests
-
-# Manual test
-# 1. Login to ERPNext
-# 2. Go to Sales Invoice
-# 3. Select a Customer
-# 4. Click "Get Items From" → "Cargo Registrations"
-```
-
 ## 📋 Features
 
 ### For Users
@@ -98,25 +85,7 @@ Multiple documentation files for different audiences
 
 | Document                                                                  | Purpose                | Audience        |
 | ------------------------------------------------------------------------- | ---------------------- | --------------- |
-| [Implementation Summary](IMPLEMENTATION_SUMMARY.md)                       | Technical overview     | Developers      |
 | [Automated Invoice Creation](docs/features/automated_invoice_creation.md) | Complete feature guide | Everyone        |
-| [Quick Reference](docs/features/quick_reference_invoice.md)               | Quick lookup           | End Users       |
-| [Visual Guide](docs/features/visual_guide_invoice.md)                     | Diagrams & workflows   | Visual learners |
-
-## 🔧 Technical Stack
-
-- **Backend**: Python (Frappe Framework)
-- **Frontend**: JavaScript (Frappe UI)
-- **Database**: MariaDB/PostgreSQL (Frappe ORM)
-- **Framework**: ERPNext v14+
-
-## 📊 System Requirements
-
-- ERPNext v14 or higher
-- Frappe Framework v14 or higher
-- VSD Fleet MS app installed
-- Cargo Registration module configured
-- Manifest module configured
 
 ## 🎨 User Interface
 
@@ -167,79 +136,3 @@ Cargo Registration → Manifest → Sales Invoice
 3. **`update_cargo_detail_on_invoice_cancel()`**
    - Clears references on cancellation
    - Makes cargo available again
-
-## ✅ Testing Checklist
-
-Use this checklist to verify the feature is working:
-
-- [ ] Button appears in Sales Invoice
-- [ ] Button only shows when customer is selected
-- [ ] Dialog shows uninvoiced cargo
-- [ ] Dialog shows truck details
-- [ ] Can select multiple cargo details
-- [ ] Invoice is created successfully
-- [ ] Invoice items have rich descriptions
-- [ ] Cargo details are marked as invoiced
-- [ ] Same cargo doesn't appear in next fetch
-- [ ] Cancel invoice clears cargo references
-- [ ] Cargo reappears after cancellation
-
-## 🐛 Known Issues
-
-None currently. Please report any issues found during testing.
-
-## 🔮 Future Enhancements
-
-Ideas for future versions:
-
-- [ ] Bulk invoice creation for multiple customers
-- [ ] Date range filter
-- [ ] Route-based filtering
-- [ ] Invoice preview before creation
-- [ ] Email notification on creation
-- [ ] Export to Excel
-- [ ] Mobile-responsive dialog
-
-## 📝 Changelog
-
-### v1.0.0 (2025-12-18)
-
-- ✨ Initial implementation
-- ✅ Backend API methods
-- ✅ Frontend UI customization
-- ✅ Truck details from Manifest
-- ✅ Double-invoice prevention
-- ✅ Cancellation handling
-- ✅ Comprehensive documentation
-- ✅ Automated tests
-
-## 🤝 Contributing
-
-To contribute to this feature:
-
-1. Create a new branch from `feat/auto_sales_invoice`
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
-
-## 📞 Support
-
-For support or questions:
-
-- **Email**: info@vvsdtz.com
-- **Documentation**: See `/docs/features/` directory
-- **Logs**: `~/frappe-bench/logs/frappe.log`
-
-## 📄 License
-
-MIT License - See [license.txt](license.txt)
-
-## 👥 Credits
-
-- **Development**: VV SYSTEMS DEVELOPER LTD
-- **Implementation Date**: December 18, 2025
-- **Feature Branch**: feat/auto_sales_invoice
-
----
-
-**Ready to merge to master after successful testing** ✅

@@ -30,7 +30,7 @@ class Trips(Document):
     def update_truck_status(self):
         frappe.db.set_value(
                 "Truck",
-                self.truck,
+                self.truck_number,
                 {"status": "On Trip", "trans_ms_current_trip": self.vehicle_trip},
             )
         frappe.db.commit()

@@ -25,6 +25,15 @@ class Trips(Document):
         if self.transporter_type == "In House":
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
+        self.update_truck_status()    
+    
+    def update_truck_status(self):
+        frappe.db.set_value(
+                "Truck",
+                self.truck_number,
+                {"status": "On Trip", "trans_ms_current_trip": self.name},
+            )
+        frappe.db.commit()
 
     def onload(self):
 

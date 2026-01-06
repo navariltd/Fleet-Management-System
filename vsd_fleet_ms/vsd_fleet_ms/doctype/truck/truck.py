@@ -26,7 +26,7 @@ class Truck(Document):
 			self.truck_number = self.license_plate
 		if self.disabled == 1:
 			# Query Vehicle Trips Doctype for the given truck
-			vehicle_trip = frappe.get_all("Trips", filters={"truck": self.name, "trip_completed": 0})
+			vehicle_trip = frappe.get_all("Trips", filters={"truck_number": self.name, "trip_completed": 0})
 
 			
 			if vehicle_trip:
@@ -42,5 +42,5 @@ class Truck(Document):
 			else:
 				self.status = "Disabled"
 		if self.status == "Disabled":
-			self.disabled == 1
+			self.disabled = 1
 

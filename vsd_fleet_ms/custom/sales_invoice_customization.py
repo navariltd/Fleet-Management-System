@@ -187,17 +187,22 @@ def create_sales_invoice_from_cargo_details(customer, company, cargo_detail_ids)
         qty = net_weight_tonne if allow_bill_on_weight else 1
         uom = bill_uom or "Nos"
 
-        invoice.append(
-            "items",
-            {
-                "item_code": detail["service_item"],
-                "qty": qty,
-                "uom": uom,
-                "rate": detail.get("rate", 0),
-                "description": description,
-                "cargo_id": detail["name"],
-            },
-        )
+        # Prepare item dictionary
+        item_dict = {
+            "item_code": detail["service_item"],
+            "qty": qty,
+            "uom": uom,
+            "rate": detail.get("rate", 0),
+            "description": description,
+            "cargo_id": detail["name"],
+        }
+
+        # Add truck field if assigned_truck exists and truck field is available
+        if detail.get("assigned_truck"):
+            if frappe.db.has_column("Sales Invoice Item", "truck"):
+                item_dict["truck"] = detail["assigned_truck"]
+
+        invoice.append("items", item_dict)
 
     # Set missing values and calculate totals
     invoice.set_missing_values()

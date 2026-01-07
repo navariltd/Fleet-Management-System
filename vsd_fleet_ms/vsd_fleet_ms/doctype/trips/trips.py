@@ -34,6 +34,7 @@ class Trips(Document):
                 {"status": "On Trip", "trans_ms_current_trip": self.name},
             )
         frappe.db.commit()
+    
 
     def onload(self):
 

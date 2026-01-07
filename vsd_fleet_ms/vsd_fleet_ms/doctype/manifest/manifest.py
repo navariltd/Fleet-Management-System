@@ -246,9 +246,15 @@ def add_to_existing_manifest(args_array):
             for row in cargo_registration.cargo_details:
                 if row.name == args_dict.get("cargo_id"):
                     row.manifest_number = args_dict.get("manifest")
+                    # Populate assigned_truck based on transporter type
+                    if manifest.transporter_type == "In House":
+                        row.assigned_truck = manifest.truck_license_plate_no
+                        row.assigned_driver = manifest.driver_name
+                    elif manifest.transporter_type == "Sub-Contractor":
+                        row.truck_number = manifest.sub_contactor_truck_license_plate_no
+                        row.driver_name = manifest.sub_contactor_driver_name
                     cargo_registration.save()
                     break
-
     return manifest.as_dict()
 
 

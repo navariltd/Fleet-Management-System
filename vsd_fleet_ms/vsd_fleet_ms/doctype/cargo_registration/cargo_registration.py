@@ -2,15 +2,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from operator import mul
 import frappe
-import time
-import datetime
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 import json
-from frappe.utils import nowdate, cstr, cint, flt, comma_or, now
-from frappe import _, msgprint
+from frappe.utils import nowdate
+from frappe import _
 from vsd_fleet_ms.utils.dimension import set_dimension
 from vsd_fleet_ms.vsd_fleet_ms.doctype.requested_payment.requested_payment import request_funds
 
@@ -26,7 +22,6 @@ class CargoRegistration(Document):
                     }
                     request_funds(**funds_args)
                     break 
-
 
 
 @frappe.whitelist()

@@ -2,19 +2,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from operator import mul
 import frappe
 import time
 import datetime
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 import json
-from frappe.utils import nowdate, cstr, cint, flt, comma_or, now
-from frappe import _, msgprint
+from frappe.utils import nowdate, now
+from frappe import _
 from frappe.model.document import Document
 from vsd_fleet_ms.utils.dimension import set_dimension
 from erpnext.setup.utils import get_exchange_rate
 from vsd_fleet_ms.vsd_fleet_ms.doctype.requested_payment.requested_payment import request_funds
+
 
 class Trips(Document):
     def before_submit(self):
@@ -34,6 +34,7 @@ class Trips(Document):
                 {"status": "On Trip", "trans_ms_current_trip": self.name},
             )
         frappe.db.commit()
+    
 
     def onload(self):
 

@@ -28,7 +28,6 @@ class Manifest(Document):
             truck.save()
 
     def before_save(self):
-
         self.validate_transporter_type()
         self.validate_has_trailers()
         if self.name:

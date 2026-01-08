@@ -22,7 +22,8 @@ class Trips(Document):
         self.validate_request_status()
 
     def on_submit(self):
-        if self.transporter_type == "In House":
+        require_stock_out = frappe.db.get_single_value("Transport Settings", "require_stock_out_entry")
+        if self.transporter_type == "In House" and require_stock_out:
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
         self.update_truck_status()    

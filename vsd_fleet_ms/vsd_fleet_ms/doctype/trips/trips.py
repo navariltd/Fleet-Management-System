@@ -199,11 +199,12 @@ class Trips(Document):
             frappe.throw("Loading Date must be set before Offloading Date")
 
     def validate_request_status(self):
+        require_fuel_purchase_order = frappe.db.get_single_value("Transport Settings", "require_fuel_purchase_order")
         for row in self.fuel_request_history:
             if row.status not in  ["Rejected", "Approved"]:
                 frappe.throw("<b>All fuel requests must be on either approved or rejected before submitting the trip</b>")
             
-            if row.status == "Approved" and not row.purchase_order:
+            if row.status == "Approved" and not row.purchase_order and require_fuel_purchase_order:
                 frappe.throw("<b>All approved fuel requests must have Purchase Order before submitting the trip</b>")
         
         for row in self.requested_fund_accounts_table:

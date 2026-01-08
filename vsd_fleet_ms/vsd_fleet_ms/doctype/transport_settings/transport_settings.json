@@ -15,6 +15,7 @@
   "expense_account_group",
   "cash_or_bank_account_group",
   "require_stock_out_entry",
+  "require_fuel_purchase_order",
   "accounting_dimension_section",
   "accounting_dimension"
  ],
@@ -77,12 +78,19 @@
    "fieldname": "require_stock_out_entry",
    "fieldtype": "Check",
    "label": "Require Stock Out Entry"
+  },
+  {
+   "default": "0",
+   "description": "Require a purchase order for requested fuel before submitting a Trips document.",
+   "fieldname": "require_fuel_purchase_order",
+   "fieldtype": "Check",
+   "label": "Require Fuel Purchase Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-08 11:24:00.035552",
+ "modified": "2026-01-08 11:34:13.389311",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Transport Settings",

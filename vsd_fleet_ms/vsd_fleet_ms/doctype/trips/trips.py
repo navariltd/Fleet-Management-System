@@ -22,7 +22,8 @@ class Trips(Document):
         self.validate_request_status()
 
     def on_submit(self):
-        if self.transporter_type == "In House":
+        require_stock_out = frappe.db.get_single_value("Transport Settings", "require_stock_out_entry")
+        if self.transporter_type == "In House" and require_stock_out:
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
         self.update_truck_status()    
@@ -198,11 +199,12 @@ class Trips(Document):
             frappe.throw("Loading Date must be set before Offloading Date")
 
     def validate_request_status(self):
+        require_fuel_purchase_order = frappe.db.get_single_value("Transport Settings", "require_fuel_purchase_order")
         for row in self.fuel_request_history:
             if row.status not in  ["Rejected", "Approved"]:
                 frappe.throw("<b>All fuel requests must be on either approved or rejected before submitting the trip</b>")
             
-            if row.status == "Approved" and not row.purchase_order:
+            if row.status == "Approved" and not row.purchase_order and require_fuel_purchase_order:
                 frappe.throw("<b>All approved fuel requests must have Purchase Order before submitting the trip</b>")
         
         for row in self.requested_fund_accounts_table:

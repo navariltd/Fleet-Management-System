@@ -14,6 +14,8 @@
   "column_break_rcaxa",
   "expense_account_group",
   "cash_or_bank_account_group",
+  "require_stock_out_entry",
+  "require_fuel_purchase_order",
   "accounting_dimension_section",
   "accounting_dimension"
  ],
@@ -69,12 +71,26 @@
    "fieldname": "accounting_dimension",
    "fieldtype": "Table",
    "options": "Transport Accounting Dimension"
+  },
+  {
+   "default": "0",
+   "description": "Ensure a stock out entry is created before submitting a Trips document.",
+   "fieldname": "require_stock_out_entry",
+   "fieldtype": "Check",
+   "label": "Require Stock Out Entry"
+  },
+  {
+   "default": "0",
+   "description": "Require a purchase order for requested fuel before submitting a Trips document.",
+   "fieldname": "require_fuel_purchase_order",
+   "fieldtype": "Check",
+   "label": "Require Fuel Purchase Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-05-16 15:56:23.614501",
+ "modified": "2026-01-08 11:34:13.389311",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Transport Settings",
@@ -91,6 +107,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

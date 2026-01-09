@@ -92,11 +92,10 @@
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
- "modified": "2023-05-18 14:42:41.741327",
+ "modified": "2025-12-04 16:28:57.608668",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Truck Driver",
- "name_case": "Title Case",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
@@ -134,11 +133,14 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "full_name",
  "show_name_in_global_search": 1,
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "title_field": "full_name",
- "track_changes": 1
+ "track_changes": 1,
+ "translated_doctype": 1
 }

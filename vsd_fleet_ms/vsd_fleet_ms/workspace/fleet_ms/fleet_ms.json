@@ -1,7 +1,7 @@
 {
  "charts": [],
  "content": "[{\"id\":\"D_r2tq24Wk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">VSD Fleet</span>\",\"col\":12}},{\"id\":\"eEKQ_vxz6K\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"id\":\"_FHA1FtdB9\",\"type\":\"card\",\"data\":{\"card_name\":\"Trips\",\"col\":4}},{\"id\":\"tiOnXE60vg\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"fgOY4518ML\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}},{\"id\":\"RRWILp0x3t\",\"type\":\"card\",\"data\":{\"card_name\":\"Transport Records\",\"col\":4}},{\"id\":\"Fvhi34VUqU\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
- "creation": "2023-05-04 18:08:12.460715",
+ "creation": "2025-12-05 12:40:39.664220",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -9,7 +9,7 @@
  "hide_custom": 0,
  "icon": "map",
  "idx": 0,
- "is_hidden": 0,
+ "is_hidden": 1,
  "label": "Fleet MS",
  "links": [
   {
@@ -249,6 +249,7 @@
    "link_to": "Trip Report and Expenses",
    "link_type": "Report",
    "onboard": 0,
+   "report_ref_doctype": "Trips",
    "type": "Link"
   },
   {
@@ -262,12 +263,12 @@
    "type": "Link"
   }
  ],
- "modified": "2024-05-06 12:10:09.083876",
+ "modified": "2025-12-05 13:59:56.652959",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Fleet MS",
  "number_cards": [],
- "owner": "arnold@vvsdtz.com",
+ "owner": "Administrator",
  "parent_page": "",
  "public": 1,
  "quick_lists": [],

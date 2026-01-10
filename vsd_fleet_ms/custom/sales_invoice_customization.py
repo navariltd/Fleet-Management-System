@@ -279,15 +279,16 @@ def build_item_description(cargo_detail):
 
 
 @frappe.whitelist()
-def update_cargo_detail_on_invoice_cancel(invoice_name):
+def update_cargo_detail_on_invoice_cancel(doc, method=None):
     """
     Clear invoice reference from cargo details when invoice is cancelled.
 
     Args:
-        invoice_name: Sales Invoice name
+        doc: Sales Invoice document
+        method: (optional) method name
     """
     cargo_details = frappe.get_all(
-        "Cargo Detail", filters={"invoice": invoice_name}, fields=["name"]
+        "Cargo Detail", filters={"invoice": doc.name}, fields=["name"]
     )
 
     for detail in cargo_details:

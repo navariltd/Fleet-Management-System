@@ -66,6 +66,11 @@ doctype_js = {"Sales Invoice": "custom/sales_invoice_custom.js"}
 # before_install = "vsd_fleet_ms.install.before_install"
 # after_install = "vsd_fleet_ms.install.after_install"
 
+# Migration
+# ---------
+
+after_migrate = "vsd_fleet_ms.install.after_migrate"
+
 # Uninstallation
 # ------------
 

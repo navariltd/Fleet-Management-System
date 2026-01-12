@@ -11,11 +11,12 @@
   "sales_item_group",
   "fuel_item_group",
   "fuel_item",
-  "column_break_rcaxa",
   "expense_account_group",
+  "column_break_rcaxa",
   "cash_or_bank_account_group",
   "require_stock_out_entry",
   "require_fuel_purchase_order",
+  "enable_cargo_invoicing",
   "accounting_dimension_section",
   "accounting_dimension"
  ],
@@ -85,12 +86,19 @@
    "fieldname": "require_fuel_purchase_order",
    "fieldtype": "Check",
    "label": "Require Fuel Purchase Order"
+  },
+  {
+   "default": "0",
+   "description": "This allows users to fetch items from cargo registration.",
+   "fieldname": "enable_cargo_invoicing",
+   "fieldtype": "Check",
+   "label": "Enable Cargo Invoicing"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-08 11:34:13.389311",
+ "modified": "2026-01-12 10:10:23.219669",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Transport Settings",

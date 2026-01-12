@@ -15,14 +15,21 @@ def ensure_transport_settings_module():
     """
     try:
         if frappe.db.exists("DocType", "Transport Settings"):
-            doctype_doc = frappe.get_doc("DocType", "Transport Settings")
+            current_module = frappe.db.get_value(
+                "DocType", "Transport Settings", "module"
+            )
 
-            if doctype_doc.module != "VSD Fleet MS":
+            if current_module != "VSD Fleet MS":
                 frappe.logger().info(
-                    f"Updating Transport Settings module from '{doctype_doc.module}' to 'VSD Fleet MS'"
+                    f"Updating Transport Settings module from '{current_module}' to 'VSD Fleet MS'"
                 )
-                doctype_doc.module = "VSD Fleet MS"
-                doctype_doc.save(ignore_permissions=True)
+                frappe.db.set_value(
+                    "DocType",
+                    "Transport Settings",
+                    "module",
+                    "VSD Fleet MS",
+                    update_modified=False,
+                )
                 frappe.db.commit()
                 frappe.logger().info("Transport Settings module updated successfully")
             else:

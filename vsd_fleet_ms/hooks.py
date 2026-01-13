@@ -69,8 +69,6 @@ doctype_js = {"Sales Invoice": "custom/sales_invoice_custom.js"}
 # Migration
 # ---------
 
-after_migrate = "vsd_fleet_ms.install.after_migrate"
-
 # Uninstallation
 # ------------
 

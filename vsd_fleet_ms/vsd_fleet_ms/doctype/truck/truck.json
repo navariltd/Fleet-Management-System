@@ -48,15 +48,13 @@
    "fieldname": "model",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Model",
-   "reqd": 1
+   "label": "Model"
   },
   {
    "fieldname": "make",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Make",
-   "reqd": 1
+   "label": "Make"
   },
   {
    "fieldname": "column_break_xpjhi",
@@ -66,14 +64,12 @@
    "fieldname": "manufacturing_year",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Manufacturing Year",
-   "reqd": 1
+   "label": "Manufacturing Year"
   },
   {
    "fieldname": "acquisition_date",
    "fieldtype": "Int",
-   "label": "Acquisition Year",
-   "reqd": 1
+   "label": "Acquisition Year"
   },
   {
    "fieldname": "located_yard",
@@ -112,8 +108,7 @@
   {
    "fieldname": "chassis_number",
    "fieldtype": "Data",
-   "label": "Chassis Number",
-   "reqd": 1
+   "label": "Chassis Number"
   },
   {
    "fieldname": "engine_number",
@@ -244,7 +239,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-25 16:44:36.452165",
+ "modified": "2026-01-23 09:03:50.000108",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Truck",
@@ -264,6 +259,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "truck_number,license_plate",
  "sort_field": "modified",
  "sort_order": "DESC",

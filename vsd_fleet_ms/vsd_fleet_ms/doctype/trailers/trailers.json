@@ -21,6 +21,7 @@
   "manufacturing_year",
   "trailer_make",
   "trailer_type",
+  "volumecapacity",
   "section_break_wboyl",
   "number_of_axels",
   "column_break_sikd1",
@@ -138,12 +139,17 @@
    "fieldname": "trailer_number",
    "fieldtype": "Data",
    "label": "Trailer Number"
+  },
+  {
+   "fieldname": "volumecapacity",
+   "fieldtype": "Float",
+   "label": "Volume/Capacity (Cubic Metres)"
   }
  ],
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-26 07:37:56.630538",
+ "modified": "2026-01-26 09:07:18.366240",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Trailers",

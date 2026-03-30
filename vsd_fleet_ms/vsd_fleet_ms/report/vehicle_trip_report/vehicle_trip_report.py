@@ -22,7 +22,7 @@ def get_columns():
 		},
 		{
 			"fieldname": "truck_number",
-			"label": "Truck Number",
+			"label": "Plate Number",
 			"fieldtype": "Link",
 			"options": "Truck",
 			"width": 150
@@ -30,6 +30,30 @@ def get_columns():
 		{
 			"fieldname": "driver_name",
 			"label": "Assigned Driver",
+			"fieldtype": "Data",
+			"width": 150
+		},
+		{
+			"fieldname": "loading_date",
+			"label": "Loading Date",
+			"fieldtype": "Date",
+			"width": 120
+		},
+		{
+			"fieldname": "loading_location",
+			"label": "Loading Place",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"fieldname": "offloading_date",
+			"label": "Offloading Date",
+			"fieldtype": "Date",
+			"width": 150
+		},
+		{
+			"fieldname": "offloading_location",
+			"label": "Offloading Place",
 			"fieldtype": "Data",
 			"width": 150
 		},
@@ -43,12 +67,27 @@ def get_data(filters):
 	return frappe.db.sql(
 		f"""
 		SELECT
-			name AS vehicle_trip,
-			truck_number,
-			driver_name
-		FROM `tabTrips`
+			t.name AS vehicle_trip,
+			t.truck_number,
+			t.driver_name,
+			rs.loading_date,
+			rs.loading_location,
+			rs.offloading_date,
+			rs.offloading_location
+		FROM `tabTrips` t
+		LEFT JOIN (
+			SELECT
+				parent,
+				MAX(CASE WHEN location_type = 'Loading Point' THEN loading_date END) AS loading_date,
+				MAX(CASE WHEN location_type = 'Loading Point' THEN location END) AS loading_location,
+				MAX(CASE WHEN location_type = 'Offloading Point' THEN offloading_date END) AS offloading_date,
+				MAX(CASE WHEN location_type = 'Offloading Point' THEN location END) AS offloading_location
+			FROM `tabRoute Steps`
+			WHERE parenttype = 'Trips' AND parentfield = 'main_route_steps'
+			GROUP BY parent
+		) rs ON rs.parent = t.name
 		WHERE {where_clause}
-		ORDER BY modified DESC
+		ORDER BY t.modified DESC
 		""",
 		values,
 		as_dict=True,
@@ -57,19 +96,19 @@ def get_data(filters):
 
 def apply_filters(filters):
 	filters = filters or {}
-	conditions = ["docstatus < 2"]
+	conditions = ["t.docstatus = 1"]
 	values = {}
 
 	if filters.get("vehicle_trip"):
-		conditions.append("name = %(vehicle_trip)s")
+		conditions.append("t.name = %(vehicle_trip)s")
 		values["vehicle_trip"] = filters.get("vehicle_trip")
 
 	if filters.get("truck_number"):
-		conditions.append("truck_number = %(truck_number)s")
+		conditions.append("t.truck_number = %(truck_number)s")
 		values["truck_number"] = filters.get("truck_number")
 
 	if filters.get("driver_name"):
-		conditions.append("driver_name LIKE %(driver_name)s")
+		conditions.append("t.driver_name LIKE %(driver_name)s")
 		values["driver_name"] = f"%{filters.get('driver_name')}%"
 
 	return " AND ".join(conditions), values

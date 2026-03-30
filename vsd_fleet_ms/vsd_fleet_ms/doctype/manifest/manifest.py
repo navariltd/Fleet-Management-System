@@ -216,6 +216,7 @@ def create_manifest_from_cargo_registration(args_array):
 def add_to_existing_manifest(args_array):
     args_dict = json.loads(args_array)
     manifest = frappe.get_doc("Manifest", args_dict.get("manifest"))
+    manifest.cargo_registration = args_dict.get("parent_doctype_name")
     manifest.append(
         "manifest_cargo_details",
         {
@@ -262,6 +263,7 @@ def create_new_manifest(args_array):
     args_dict = json.loads(args_array)
     manifest = frappe.new_doc("Manifest")
     manifest.route = args_dict.get("cargo_route")
+    manifest.cargo_registration = args_dict.get("parent_doctype_name")
     manifest.posting_date = datetime.datetime.now().date()
     manifest.append(
         "manifest_cargo_details",

@@ -218,11 +218,12 @@ class Trips(Document):
 @frappe.whitelist()
 def create_vehicle_trip_from_manifest(args_array):
     args_dict = json.loads(args_array)
+    manifest = frappe.get_doc("Manifest", args_dict.get("manifest_name"))
     vehicle_trip = frappe.new_doc("Trips")
     vehicle_trip.manifest = args_dict.get("manifest_name")
     vehicle_trip.transporter_type = args_dict.get("transporter_type")
+    vehicle_trip.cargo_registration = manifest.cargo_registration if manifest.cargo_registration else ""
     if vehicle_trip.save():
-        manifest = frappe.get_doc("Manifest", args_dict.get("manifest_name"))
         manifest.vehicle_trip = vehicle_trip.name
         manifest.save()
         cargos = frappe.get_all("Cargo Detail", filters={"manifest_number":manifest.name}, fields="*")

@@ -645,14 +645,15 @@
    "fieldname": "cargo_registration",
    "fieldtype": "Link",
    "label": "Source Cargo Registration",
-   "options": "Cargo Registration"
+   "options": "Cargo Registration",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 18:38:06.731409",
+ "modified": "2026-03-30 19:14:10.574930",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Trips",

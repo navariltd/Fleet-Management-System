@@ -11,6 +11,7 @@
   "manifest",
   "section_break_8hd1v",
   "transporter_type",
+  "cargo_registration",
   "column_break_tvryv",
   "vehicle_trip",
   "sub_contractor_name",
@@ -285,16 +286,23 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "cargo_registration",
+   "fieldtype": "Link",
+   "label": "Source Cargo Registration",
+   "options": "Cargo Registration",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-12 17:15:22.743578",
+ "modified": "2026-03-30 18:36:11.970091",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Manifest",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -328,6 +336,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

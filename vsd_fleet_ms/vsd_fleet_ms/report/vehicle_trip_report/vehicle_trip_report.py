@@ -75,6 +75,12 @@ def get_columns():
 			"fieldtype": "Data",
 			"width": 150
 		},
+		{
+			"fieldname": "cargo_types",
+			"label": "Cargo Types",
+			"fieldtype": "Data",
+			"width": 220
+		}
 	]
 	return columns
 
@@ -95,7 +101,8 @@ def get_data(filters):
 			rfd.peage_expense,
 			rfd.peage_expense_status,
 			rfd.fm_expense,
-			rfd.fm_expense_status
+			rfd.fm_expense_status,
+			mcd.cargo_types
 		FROM `tabTrips` t
 		LEFT JOIN (
 			SELECT
@@ -119,6 +126,14 @@ def get_data(filters):
 			WHERE parenttype = 'Trips' AND parentfield = 'requested_fund_accounts_table'
 			GROUP BY parent
 		) rfd ON rfd.parent = t.name
+		LEFT JOIN (
+			SELECT
+				parent,
+				GROUP_CONCAT(DISTINCT cargo_type ORDER BY cargo_type SEPARATOR ', ') AS cargo_types
+			FROM `tabManifest Cargo Details`
+			WHERE IFNULL(cargo_type, '') != ''
+			GROUP BY parent
+		) mcd ON mcd.parent = t.manifest
 		WHERE {where_clause}
 		ORDER BY t.modified DESC
 		""",
@@ -143,5 +158,16 @@ def apply_filters(filters):
 	if filters.get("driver_name"):
 		conditions.append("t.driver_name LIKE %(driver_name)s")
 		values["driver_name"] = f"%{filters.get('driver_name')}%"
+
+	if filters.get("cargo_type"):
+		conditions.append(
+			"""EXISTS (
+				SELECT 1
+				FROM `tabManifest Cargo Details` mcd_filter
+				WHERE mcd_filter.parent = t.manifest
+				  AND mcd_filter.cargo_type = %(cargo_type)s
+			)"""
+		)
+		values["cargo_type"] = filters.get("cargo_type")
 
 	return " AND ".join(conditions), values

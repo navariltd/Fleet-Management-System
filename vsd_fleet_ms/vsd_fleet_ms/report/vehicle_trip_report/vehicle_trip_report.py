@@ -52,8 +52,26 @@ def get_columns():
 			"width": 150
 		},
 		{
-			"fieldname": "offloading_location",
-			"label": "Offloading Place",
+			"fieldname": "peage_expense",
+			"label": "Peage",
+			"fieldtype": "Currency",
+			"width": 150
+		},
+		{
+			"fieldname": "peage_expense_status",
+			"label": "Peage Status",
+			"fieldtype": "Data",
+			"width": 150
+		},
+		{
+			"fieldname": "fm_expense",
+			"label": "FM",
+			"fieldtype": "Currency",
+			"width": 150
+		},
+		{
+			"fieldname": "fm_expense_status",
+			"label": "FM Status",
 			"fieldtype": "Data",
 			"width": 150
 		},
@@ -73,7 +91,11 @@ def get_data(filters):
 			rs.loading_date,
 			rs.loading_location,
 			rs.offloading_date,
-			rs.offloading_location
+			rs.offloading_location,
+			rfd.peage_expense,
+			rfd.peage_expense_status,
+			rfd.fm_expense,
+			rfd.fm_expense_status
 		FROM `tabTrips` t
 		LEFT JOIN (
 			SELECT
@@ -86,6 +108,17 @@ def get_data(filters):
 			WHERE parenttype = 'Trips' AND parentfield = 'main_route_steps'
 			GROUP BY parent
 		) rs ON rs.parent = t.name
+		LEFT JOIN (
+			SELECT
+				parent,
+				MAX(CASE WHEN expense_type = 'Peage' THEN request_amount END) AS peage_expense,
+				MAX(CASE WHEN expense_type = 'Peage' THEN request_status END) AS peage_expense_status,
+				MAX(CASE WHEN expense_type = 'FM' THEN request_amount END) AS fm_expense,
+				MAX(CASE WHEN expense_type = 'FM' THEN request_status END) AS fm_expense_status
+			FROM `tabRequested Fund Details`
+			WHERE parenttype = 'Trips' AND parentfield = 'requested_fund_accounts_table'
+			GROUP BY parent
+		) rfd ON rfd.parent = t.name
 		WHERE {where_clause}
 		ORDER BY t.modified DESC
 		""",
@@ -112,11 +145,3 @@ def apply_filters(filters):
 		values["driver_name"] = f"%{filters.get('driver_name')}%"
 
 	return " AND ".join(conditions), values
-
-
-def get_offloading_data(filters):
-	pass
-
-
-def get_onloading_data(filters):
-	pass

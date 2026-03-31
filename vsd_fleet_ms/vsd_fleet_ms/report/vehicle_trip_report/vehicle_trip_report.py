@@ -82,11 +82,23 @@ def get_columns():
 			"width": 220
 		},
 		{
-			"fieldname": "loaded_weight",
-			"label": "Loaded QTY",
+			"fieldname": "approved_fuel",
+			"label": "Fuel",
 			"fieldtype": "Data",
 			"width": 150
 		}
+		{
+			"fieldname": "loaded_weight",
+			"label": "Qty Loaded (Kg)",
+			"fieldtype": "Data",
+			"width": 150
+		},
+		{
+			"fieldname": "offloaded_weight",
+			"label": "Qty Offloaded (Kg)",
+			"fieldtype": "Data",
+			"width": 150
+		},
 	]
 	return columns
 
@@ -109,7 +121,8 @@ def get_data(filters):
 			rfd.fm_expense,
 			rfd.fm_expense_status,
 			mcd.cargo_types,
-			mcd.loaded_weight
+			mcd.loaded_weight,
+			COALESCE(frt.approved_fuel, 0) AS approved_fuel
 		FROM `tabTrips` t
 		LEFT JOIN (
 			SELECT
@@ -144,6 +157,14 @@ def get_data(filters):
 			  AND IFNULL(cargo_type, '') != ''
 			GROUP BY parent
 		) mcd ON mcd.parent = t.manifest
+		LEFT JOIN (
+			SELECT
+				parent,
+				SUM(CASE WHEN status = 'Approved' THEN quantity ELSE 0 END) AS approved_fuel
+			FROM `tabFuel Requests Table`
+			WHERE parenttype = 'Trips' AND parentfield = 'fuel_request_history'
+			GROUP BY parent
+		) frt ON frt.parent = t.name
 		WHERE {where_clause}
 		ORDER BY t.modified DESC
 		""",

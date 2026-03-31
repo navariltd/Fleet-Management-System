@@ -80,6 +80,12 @@ def get_columns():
 			"label": "Cargo Types",
 			"fieldtype": "Data",
 			"width": 220
+		},
+		{
+			"fieldname": "loaded_weight",
+			"label": "Loaded QTY",
+			"fieldtype": "Data",
+			"width": 150
 		}
 	]
 	return columns
@@ -102,7 +108,8 @@ def get_data(filters):
 			rfd.peage_expense_status,
 			rfd.fm_expense,
 			rfd.fm_expense_status,
-			mcd.cargo_types
+			mcd.cargo_types,
+			mcd.loaded_weight
 		FROM `tabTrips` t
 		LEFT JOIN (
 			SELECT
@@ -129,9 +136,12 @@ def get_data(filters):
 		LEFT JOIN (
 			SELECT
 				parent,
-				GROUP_CONCAT(DISTINCT cargo_type ORDER BY cargo_type SEPARATOR ', ') AS cargo_types
+				GROUP_CONCAT(cargo_type ORDER BY idx SEPARATOR ', ') AS cargo_types,
+				GROUP_CONCAT(weight ORDER BY idx SEPARATOR ', ') AS loaded_weight
 			FROM `tabManifest Cargo Details`
-			WHERE IFNULL(cargo_type, '') != ''
+			WHERE parenttype = 'Manifest'
+			  AND parentfield = 'manifest_cargo_details'
+			  AND IFNULL(cargo_type, '') != ''
 			GROUP BY parent
 		) mcd ON mcd.parent = t.manifest
 		WHERE {where_clause}

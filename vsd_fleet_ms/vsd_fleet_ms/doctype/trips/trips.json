@@ -13,6 +13,7 @@
   "manifest",
   "transporter_type",
   "date",
+  "cargo_registration",
   "column_break_bs0gw",
   "company",
   "sub_contractor_name",
@@ -41,14 +42,12 @@
   "column_break_sw9re",
   "trailer_3",
   "sub_contactor_trailer_3",
-  "section_break_o887x",
   "main_trips_tab",
   "main_route_steps",
   "summary_section",
   "total_distance",
   "column_break_g36mb",
   "total_fuel",
-  "section_break_2luhc",
   "side_trips_tab",
   "side_trips",
   "location_update_tab",
@@ -134,10 +133,6 @@
    "label": "Round Trip",
    "options": "Round Trip",
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_o887x",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "side_trips",
@@ -320,10 +315,6 @@
    "label": "Route Steps",
    "options": "Route Steps",
    "read_only_depends_on": "eval:doc.trip_status == \"Breakdown\""
-  },
-  {
-   "fieldname": "section_break_2luhc",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "section_break_gfrrc",
@@ -649,13 +640,20 @@
    "fieldname": "container_return_time",
    "fieldtype": "Data",
    "label": "Container Return Time(Interchange)"
+  },
+  {
+   "fieldname": "cargo_registration",
+   "fieldtype": "Link",
+   "label": "Source Cargo Registration",
+   "options": "Cargo Registration",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-12 17:38:37.420035",
+ "modified": "2026-03-30 19:14:10.574930",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Trips",
@@ -691,6 +689,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "manifest,transporter_type,route",
  "sort_field": "modified",
  "sort_order": "DESC",

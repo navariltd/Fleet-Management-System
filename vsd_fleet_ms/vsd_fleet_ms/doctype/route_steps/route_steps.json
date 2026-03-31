@@ -24,7 +24,9 @@
   "doc_received_by",
   "crossing_time",
   "extra_information_section",
-  "comment"
+  "comment",
+  "column_break_eghv",
+  "load_qty"
  ],
  "fields": [
   {
@@ -48,7 +50,9 @@
    "fieldname": "location_type",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Location Type"
+   "label": "Location Type",
+   "options": "Loading Point\nOffloading Point",
+   "reqd": 1
   },
   {
    "fieldname": "fuel_consumption_qty",
@@ -123,17 +127,27 @@
    "fieldname": "comment",
    "fieldtype": "Data",
    "label": "Additional Comment"
+  },
+  {
+   "fieldname": "column_break_eghv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "load_qty",
+   "fieldtype": "Int",
+   "label": "Loading/Offloading Qty (Kgs)"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-06 18:15:00.419459",
+ "modified": "2026-03-31 00:24:02.609257",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Route Steps",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

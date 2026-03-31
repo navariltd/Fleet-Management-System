@@ -86,7 +86,13 @@ def get_columns():
 			"label": "Fuel",
 			"fieldtype": "Data",
 			"width": 150
-		}
+		},
+		{
+			"fieldname": "cargo_types",
+			"label": "Cargo Types",
+			"fieldtype": "Data",
+			"width": 220
+		},
 		{
 			"fieldname": "loaded_weight",
 			"label": "Qty Loaded (Kg)",
@@ -98,7 +104,7 @@ def get_columns():
 			"label": "Qty Offloaded (Kg)",
 			"fieldtype": "Data",
 			"width": 150
-		},
+		}
 	]
 	return columns
 
@@ -121,7 +127,8 @@ def get_data(filters):
 			rfd.fm_expense,
 			rfd.fm_expense_status,
 			mcd.cargo_types,
-			mcd.loaded_weight,
+			rs.loaded_weight,
+			rs.offloaded_weight,
 			COALESCE(frt.approved_fuel, 0) AS approved_fuel
 		FROM `tabTrips` t
 		LEFT JOIN (
@@ -130,7 +137,9 @@ def get_data(filters):
 				MAX(CASE WHEN location_type = 'Loading Point' THEN loading_date END) AS loading_date,
 				MAX(CASE WHEN location_type = 'Loading Point' THEN location END) AS loading_location,
 				MAX(CASE WHEN location_type = 'Offloading Point' THEN offloading_date END) AS offloading_date,
-				MAX(CASE WHEN location_type = 'Offloading Point' THEN location END) AS offloading_location
+				MAX(CASE WHEN location_type = 'Offloading Point' THEN location END) AS offloading_location,
+				MAX(CASE WHEN location_type = 'Loading Point' THEN load_qty END) AS loaded_weight,
+				MAX(CASE WHEN location_type = 'Offloading Point' THEN load_qty END) AS offloaded_weight
 			FROM `tabRoute Steps`
 			WHERE parenttype = 'Trips' AND parentfield = 'main_route_steps'
 			GROUP BY parent
@@ -149,8 +158,7 @@ def get_data(filters):
 		LEFT JOIN (
 			SELECT
 				parent,
-				GROUP_CONCAT(cargo_type ORDER BY idx SEPARATOR ', ') AS cargo_types,
-				GROUP_CONCAT(weight ORDER BY idx SEPARATOR ', ') AS loaded_weight
+				GROUP_CONCAT(cargo_type ORDER BY idx SEPARATOR ', ') AS cargo_types
 			FROM `tabManifest Cargo Details`
 			WHERE parenttype = 'Manifest'
 			  AND parentfield = 'manifest_cargo_details'

@@ -104,6 +104,12 @@ def get_columns():
 			"label": "Qty Offloaded (Kg)",
 			"fieldtype": "Data",
 			"width": 150
+		},
+		{
+			"fieldname": "load_difference",
+			"label": "Load Difference (Kg)",
+			"fieldtype": "Data",
+			"width": 150
 		}
 	]
 	return columns
@@ -129,6 +135,7 @@ def get_data(filters):
 			mcd.cargo_types,
 			rs.loaded_weight,
 			rs.offloaded_weight,
+			(COALESCE(rs.loaded_weight, 0) - COALESCE(rs.offloaded_weight, 0)) AS load_difference,
 			COALESCE(frt.approved_fuel, 0) AS approved_fuel
 		FROM `tabTrips` t
 		LEFT JOIN (

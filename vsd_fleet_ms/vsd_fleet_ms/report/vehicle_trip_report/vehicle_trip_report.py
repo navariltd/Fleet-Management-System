@@ -82,16 +82,17 @@ def get_columns():
 			"width": 220
 		},
 		{
+			"fieldname": "customer",
+			"label": "Customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 180
+		},
+		{
 			"fieldname": "approved_fuel",
 			"label": "Fuel",
 			"fieldtype": "Data",
 			"width": 150
-		},
-		{
-			"fieldname": "cargo_types",
-			"label": "Cargo Types",
-			"fieldtype": "Data",
-			"width": 220
 		},
 		{
 			"fieldname": "loaded_weight",
@@ -133,6 +134,7 @@ def get_data(filters):
 			rfd.fm_expense,
 			rfd.fm_expense_status,
 			mcd.cargo_types,
+			mcd.customer,
 			rs.loaded_weight,
 			rs.offloaded_weight,
 			(COALESCE(rs.loaded_weight, 0) - COALESCE(rs.offloaded_weight, 0)) AS load_difference,
@@ -165,7 +167,8 @@ def get_data(filters):
 		LEFT JOIN (
 			SELECT
 				parent,
-				GROUP_CONCAT(cargo_type ORDER BY idx SEPARATOR ', ') AS cargo_types
+				GROUP_CONCAT(cargo_type ORDER BY idx SEPARATOR ', ') AS cargo_types,
+				GROUP_CONCAT(customer_name ORDER BY idx SEPARATOR ', ') AS customer
 			FROM `tabManifest Cargo Details`
 			WHERE parenttype = 'Manifest'
 			  AND parentfield = 'manifest_cargo_details'

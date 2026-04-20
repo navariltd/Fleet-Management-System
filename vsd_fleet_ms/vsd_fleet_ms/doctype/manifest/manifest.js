@@ -2,14 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Manifest', {
-	has_trailers: function(frm){
-		if (frm.doc.has_trailers == 0){
-		frm.doc.manifest_cargo_details.forEach(function(row) {
-			cur_frm.set_df_property("manifest_cargo_details", "cargo_allocation", "read_only", 1, row.idx);
-		  });	
-		  cur_frm.refresh_field("manifest_cargo_details")	
-		}	  
-	},
 	transporter_type: (frm) => {
         // Get the transporter type value
         var transporter_type = frm.doc.transporter_type;
@@ -59,12 +51,6 @@ frappe.ui.form.on('Manifest', {
 				})
 			});
 		}
-		if (frm.doc.has_trailers == 0){
-			frm.doc.manifest_cargo_details.forEach(function(row) {
-				cur_frm.set_df_property("manifest_cargo_details", "cargo_allocation", "read_only", 1, row.idx);
-			  });
-			  cur_frm.refresh_field("manifest_cargo_details")	
-			}
 		if(frm.doc.docstatus == 1 && !frm.doc.vehicle_trip){
 			var args_array = [];
 			if (frm.doc.transporter_type == "In House"){
@@ -175,7 +161,7 @@ frappe.ui.form.on('Manifest', {
 	});
 	},
 	onload: function(frm){
-		frm.get_field("manifest_cargo_details").grid.cannot_add_rows = true;
+		frm.get_field("manifest_cargo_details").grid.cannot_add_rows = false;
 		var total_kg = 0;
 		frm.doc.manifest_cargo_details.forEach(function(row) {
 		total_kg = total_kg + parseInt(row.weight);

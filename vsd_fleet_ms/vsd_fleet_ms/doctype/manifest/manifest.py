@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import datetime
+import re
 import frappe
 import json
 
@@ -28,11 +29,38 @@ class Manifest(Document):
             truck.save()
 
     def before_save(self):
+        self.assign_missing_manifest_cargo_ids()
         self.validate_transporter_type()
         self.validate_has_trailers()
         if self.name:
             self.update_cargo_registration_details()
             self.update_trips()
+
+    def assign_missing_manifest_cargo_ids(self):
+        for row in self.manifest_cargo_details or []:
+            if not row.cargo_id:
+                row.cargo_id = self.generate_manifest_cargo_id(row.cargo_type)
+
+    def generate_manifest_cargo_id(self, cargo_type):
+        safe_cargo_type = (cargo_type or "CARGO").strip().replace("/", "-")
+        date_part = datetime.datetime.now().strftime("%d/%m/%Y")
+        prefix = f"{safe_cargo_type}-{date_part}-"
+
+        existing_rows = frappe.get_all(
+            "Manifest Cargo Details",
+            filters={"cargo_id": ["like", f"{prefix}%"]},
+            fields=["cargo_id"],
+            limit_page_length=0,
+        )
+
+        max_suffix = 0
+        for existing in existing_rows:
+            value = existing.get("cargo_id") or ""
+            match = re.search(r"-(\d{4})$", value)
+            if match:
+                max_suffix = max(max_suffix, int(match.group(1)))
+
+        return f"{prefix}{max_suffix + 1:04d}"
 
     def on_submit(self):
         self.set_truck_dimension()

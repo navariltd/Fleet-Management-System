@@ -6,14 +6,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "customer_name",
-  "cargo_id",
-  "cargo_route",
   "column_break_aruf5",
   "cargo_type",
   "cargo_allocation",
   "sub_contractor_cargo_allocation",
   "specific_cargo_allocated",
+  "column_break_jmcn",
+  "customer_name",
+  "cargo_id",
+  "cargo_route",
   "section_break_ordr3",
   "seal_number",
   "number_of_package",
@@ -37,13 +38,11 @@
    "fieldname": "customer_name",
    "fieldtype": "Link",
    "label": "Customer Name",
-   "options": "Customer",
-   "read_only": 1
+   "options": "Customer"
   },
   {
    "fieldname": "cargo_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Cargo ID",
    "read_only": 1
   },
@@ -60,9 +59,10 @@
   {
    "fetch_from": "cargo_id.cargo_status",
    "fieldname": "cargo_type",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Cargo Type",
-   "read_only": 1
+   "options": "Cargo Types"
   },
   {
    "depends_on": "eval:doc.transporter_type != \"Sub-Contractor\"",
@@ -81,8 +81,7 @@
    "fieldname": "number_of_package",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Number of Package",
-   "read_only": 1
+   "label": "Number of Package"
   },
   {
    "fieldname": "column_break_6vchs",
@@ -93,8 +92,7 @@
    "fieldname": "weight",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Weight (Kg)",
-   "read_only": 1
+   "label": "Weight (Kg)"
   },
   {
    "fieldname": "section_break_buahv",
@@ -143,26 +141,22 @@
   {
    "fieldname": "seal_number",
    "fieldtype": "Data",
-   "label": "Seal Number",
-   "read_only": 1
+   "label": "Seal Number"
   },
   {
    "fieldname": "container_size",
    "fieldtype": "Data",
-   "label": "Size",
-   "read_only": 1
+   "label": "Size"
   },
   {
    "fieldname": "container_number",
    "fieldtype": "Data",
-   "label": "Container Number",
-   "read_only": 1
+   "label": "Container Number"
   },
   {
    "fieldname": "bl_number",
    "fieldtype": "Data",
-   "label": "Bl Number",
-   "read_only": 1
+   "label": "Bl Number"
   },
   {
    "depends_on": "eval:doc.transporter_type != \"Sub-Contractor\"",
@@ -187,17 +181,22 @@
    "label": "Transporter Type",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_jmcn",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-19 16:42:23.377161",
+ "modified": "2026-04-20 10:48:34.601495",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Manifest Cargo Details",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

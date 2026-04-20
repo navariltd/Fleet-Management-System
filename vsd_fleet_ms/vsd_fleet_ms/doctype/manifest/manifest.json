@@ -13,6 +13,7 @@
   "transporter_type",
   "cargo_registration",
   "column_break_tvryv",
+  "customer",
   "vehicle_trip",
   "sub_contractor_name",
   "section_break_6xysb",
@@ -293,12 +294,18 @@
    "label": "Source Cargo Registration",
    "options": "Cargo Registration",
    "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 18:36:11.970091",
+ "modified": "2026-04-20 10:33:44.694223",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Manifest",

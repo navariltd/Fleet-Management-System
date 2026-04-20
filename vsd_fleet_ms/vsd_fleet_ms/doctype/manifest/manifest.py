@@ -75,13 +75,14 @@ class Manifest(Document):
             frappe.throw("At least one Manifest Cargo Details row must have a Cargo ID.")
 
         source_rows = self.get_source_cargo_details()
-        if not source_rows:
-            frappe.throw(
-                "No source Cargo Detail rows were found for this Manifest's cargo entries."
-            )
+        first_source_row = next(iter(source_rows.values()), {}) if source_rows else {}
 
-        first_source_row = next(iter(source_rows.values()), {})
-        customers = {d.customer_name for d in valid_rows if d.customer_name}
+        customers = set()
+        for row in valid_rows:
+            source = source_rows.get(row.cargo_id)
+            customers.add((row.customer_name or (source or {}).get("parent_customer") or "").strip())
+        customers.discard("")
+
         if len(customers) > 1:
             frappe.throw(
                 "Manifest contains cargo from multiple customers. "
@@ -97,57 +98,99 @@ class Manifest(Document):
         cargo_registration = frappe.new_doc("Cargo Registration")
         cargo_registration.customer = customer
         cargo_registration.posting_date = self.posting_date or datetime.date.today()
-        if first_source_row.get("parent_company"):
-            cargo_registration.company = first_source_row.get("parent_company")
+        company = first_source_row.get("parent_company") or frappe.defaults.get_global_default(
+            "company"
+        )
+        if company:
+            cargo_registration.company = company
 
+        appended_rows = []
         for row in valid_rows:
             source = source_rows.get(row.cargo_id)
-            if not source:
-                continue
+            cargo_route = (source or {}).get("cargo_route") or row.cargo_route
+            loading_date = (source or {}).get("loading_date") or row.expected_loading_date
+            expected_offloading_date = (source or {}).get("expected_offloading_date") or row.expected_offloading_date
+            cargo_location_country = (source or {}).get("cargo_location_country") or row.cargo_location_country
+            cargo_location_city = (source or {}).get("cargo_location_city") or row.cargo_loading_city
+            cargo_destination_country = (source or {}).get("cargo_destination_country") or row.cargo_destination_country
+            cargo_destination_city = (source or {}).get("cargo_destination_city") or row.cargo_destination_city
+
+            missing_fields = []
+            if not cargo_route:
+                missing_fields.append("cargo_route")
+            if not loading_date:
+                missing_fields.append("loading_date")
+            if not expected_offloading_date:
+                missing_fields.append("expected_offloading_date")
+            if not cargo_location_country:
+                missing_fields.append("cargo_location_country")
+            if not cargo_location_city:
+                missing_fields.append("cargo_location_city")
+            if not cargo_destination_country:
+                missing_fields.append("cargo_destination_country")
+            if not cargo_destination_city:
+                missing_fields.append("cargo_destination_city")
+
+            if missing_fields:
+                frappe.throw(
+                    f"Manifest row {row.idx} is missing required values for Cargo Registration creation: "
+                    f"{', '.join(missing_fields)}"
+                )
 
             cargo_registration.append(
                 "cargo_details",
                 {
-                    "cargo_id": source.get("cargo_id") or row.cargo_id,
-                    "cargo_type": source.get("cargo_type") or row.cargo_type,
-                    "container_size": source.get("container_size") or row.container_size,
-                    "seal_number": source.get("seal_number") or row.seal_number,
-                    "bl_number": source.get("bl_number") or row.bl_number,
-                    "cargo_route": source.get("cargo_route") or row.cargo_route,
-                    "net_weight": source.get("net_weight") or row.weight or 0,
-                    "number_of_packages": source.get("number_of_packages")
+                    "cargo_id": (source or {}).get("cargo_id") or row.cargo_id,
+                    "cargo_type": (source or {}).get("cargo_type") or row.cargo_type,
+                    "container_size": (source or {}).get("container_size")
+                    or row.container_size
+                    or "Loose",
+                    "seal_number": (source or {}).get("seal_number") or row.seal_number,
+                    "bl_number": (source or {}).get("bl_number") or row.bl_number,
+                    "cargo_route": cargo_route,
+                    "net_weight": (source or {}).get("net_weight") or row.weight or 0,
+                    "number_of_packages": (source or {}).get("number_of_packages")
                     or row.number_of_package
                     or 0,
-                    "container_number": source.get("container_number")
+                    "container_number": (source or {}).get("container_number")
                     or row.container_number,
-                    "service_item": source.get("service_item") or "Transportation Service",
-                    "currency": source.get("currency")
+                    "service_item": (source or {}).get("service_item")
+                    or "Transportation Service",
+                    "currency": (source or {}).get("currency")
                     or frappe.defaults.get_user_default("Currency")
                     or "USD",
-                    "rate": source.get("rate") or 0,
-                    "cargo_location_country": source.get("cargo_location_country")
-                    or row.cargo_location_country,
-                    "cargo_location_city": source.get("cargo_location_city")
-                    or row.cargo_loading_city,
-                    "loading_date": source.get("loading_date")
-                    or row.expected_loading_date,
-                    "cargo_destination_country": source.get("cargo_destination_country")
-                    or row.cargo_destination_country,
-                    "cargo_destination_city": source.get("cargo_destination_city")
-                    or row.cargo_destination_city,
-                    "expected_offloading_date": source.get("expected_offloading_date")
-                    or row.expected_offloading_date,
+                    "rate": (source or {}).get("rate") or 0,
+                    "cargo_location_country": cargo_location_country,
+                    "cargo_location_city": cargo_location_city,
+                    "loading_date": loading_date,
+                    "cargo_destination_country": cargo_destination_country,
+                    "cargo_destination_city": cargo_destination_city,
+                    "expected_offloading_date": expected_offloading_date,
                     "manifest_number": self.name,
                 },
             )
+            appended_rows.append(row)
 
         if not cargo_registration.cargo_details:
             frappe.throw(
-                "Unable to create Cargo Registration because no valid source Cargo Detail rows were matched."
+                "Unable to create Cargo Registration because no valid Manifest cargo rows were found."
             )
 
         cargo_registration.insert(ignore_permissions=True)
         self.db_set("cargo_registration", cargo_registration.name, update_modified=False)
+
+        # Keep downstream logic consistent by linking each manifest row to created Cargo Detail names.
+        for index, row in enumerate(appended_rows):
+            created_row = cargo_registration.cargo_details[index]
+            row.cargo_id = created_row.name
+            if row.name:
+                frappe.db.set_value(
+                    "Manifest Cargo Details",
+                    row.name,
+                    "cargo_id",
+                    created_row.name,
+                    update_modified=False,
+                )
 
     def get_source_cargo_details(self):
         cargo_ids = [d.cargo_id for d in self.manifest_cargo_details if d.cargo_id]
@@ -156,7 +199,7 @@ class Manifest(Document):
 
         cargo_ids = list(dict.fromkeys(cargo_ids))
 
-        source_details = frappe.get_all(
+        source_details_by_name = frappe.get_all(
             "Cargo Detail",
             filters={"name": ["in", cargo_ids]},
             fields=[
@@ -183,13 +226,44 @@ class Manifest(Document):
             ],
         )
 
+        source_details_by_cargo_id = frappe.get_all(
+            "Cargo Detail",
+            filters={"cargo_id": ["in", cargo_ids]},
+            fields=[
+                "name",
+                "parent",
+                "cargo_id",
+                "cargo_type",
+                "container_size",
+                "seal_number",
+                "bl_number",
+                "cargo_route",
+                "net_weight",
+                "number_of_packages",
+                "container_number",
+                "service_item",
+                "currency",
+                "rate",
+                "cargo_location_country",
+                "cargo_location_city",
+                "loading_date",
+                "cargo_destination_country",
+                "cargo_destination_city",
+                "expected_offloading_date",
+            ],
+        )
+
+        source_details = {}
+        for d in source_details_by_name + source_details_by_cargo_id:
+            source_details[d.name] = d
+
         by_name = {}
-        for d in source_details:
+        for d in source_details.values():
             by_name[d.name] = d
             if d.get("cargo_id"):
                 by_name[d.get("cargo_id")] = d
 
-        parent_names = list({d.parent for d in source_details if d.parent})
+        parent_names = list({d.parent for d in source_details.values() if d.parent})
 
         parent_map = {}
         if parent_names:

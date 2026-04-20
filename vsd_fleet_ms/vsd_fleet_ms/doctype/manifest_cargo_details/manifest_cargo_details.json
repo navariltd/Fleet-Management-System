@@ -38,8 +38,7 @@
    "fieldname": "customer_name",
    "fieldtype": "Link",
    "label": "Customer Name",
-   "options": "Customer",
-   "read_only": 1
+   "options": "Customer"
   },
   {
    "fieldname": "cargo_id",
@@ -61,6 +60,7 @@
    "fetch_from": "cargo_id.cargo_status",
    "fieldname": "cargo_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Cargo Type",
    "options": "Cargo Types"
   },
@@ -190,7 +190,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-20 09:20:50.280452",
+ "modified": "2026-04-20 10:48:34.601495",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Manifest Cargo Details",

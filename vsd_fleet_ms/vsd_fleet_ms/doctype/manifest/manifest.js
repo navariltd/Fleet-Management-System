@@ -226,8 +226,6 @@ frappe.ui.form.on('Manifest', {
 		// 		};
 		// 	});
 		// }
-		
-		
 	},
 	trailer_1: function(frm){
 		if (!frm.doc.trailer_1){

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import datetime
+import re
 import frappe
 import json
 
@@ -28,14 +29,183 @@ class Manifest(Document):
             truck.save()
 
     def before_save(self):
+        self.assign_missing_manifest_cargo_ids()
         self.validate_transporter_type()
         self.validate_has_trailers()
         if self.name:
             self.update_cargo_registration_details()
             self.update_trips()
 
+    def assign_missing_manifest_cargo_ids(self):
+        for row in self.manifest_cargo_details or []:
+            if not row.cargo_id:
+                row.cargo_id = self.generate_manifest_cargo_id(row.cargo_type)
+
+    def generate_manifest_cargo_id(self, cargo_type):
+        safe_cargo_type = (cargo_type or "CARGO").strip().replace("/", "-")
+        date_part = datetime.datetime.now().strftime("%d/%m/%Y")
+        prefix = f"{safe_cargo_type}-{date_part}-"
+
+        existing_rows = frappe.get_all(
+            "Manifest Cargo Details",
+            filters={"cargo_id": ["like", f"{prefix}%"]},
+            fields=["cargo_id"],
+            limit_page_length=0,
+        )
+
+        max_suffix = 0
+        for existing in existing_rows:
+            value = existing.get("cargo_id") or ""
+            match = re.search(r"-(\d{4})$", value)
+            if match:
+                max_suffix = max(max_suffix, int(match.group(1)))
+
+        return f"{prefix}{max_suffix + 1:04d}"
+
     def on_submit(self):
+        self.create_cargo_registration_on_submit()
         self.set_truck_dimension()
+
+    def create_cargo_registration_on_submit(self):
+        if not self.manifest_cargo_details:
+            return
+
+        valid_rows = [d for d in self.manifest_cargo_details if d.cargo_id]
+        if not valid_rows:
+            frappe.throw("At least one Manifest Cargo Details row must have a Cargo ID.")
+
+        source_rows = self.get_source_cargo_details()
+        if not source_rows:
+            frappe.throw(
+                "No source Cargo Detail rows were found for this Manifest's cargo entries."
+            )
+
+        first_source_row = next(iter(source_rows.values()), {})
+        customers = {d.customer_name for d in valid_rows if d.customer_name}
+        if len(customers) > 1:
+            frappe.throw(
+                "Manifest contains cargo from multiple customers. "
+                "Submit separate manifests per customer to auto-create Cargo Registration."
+            )
+
+        customer = next(iter(customers), None) or first_source_row.get("parent_customer")
+        if not customer:
+            frappe.throw(
+                "Customer is required to create Cargo Registration from submitted Manifest."
+            )
+
+        cargo_registration = frappe.new_doc("Cargo Registration")
+        cargo_registration.customer = customer
+        cargo_registration.posting_date = self.posting_date or datetime.date.today()
+        if first_source_row.get("parent_company"):
+            cargo_registration.company = first_source_row.get("parent_company")
+
+        for row in valid_rows:
+            source = source_rows.get(row.cargo_id)
+            if not source:
+                continue
+
+            cargo_registration.append(
+                "cargo_details",
+                {
+                    "cargo_id": source.get("cargo_id") or row.cargo_id,
+                    "cargo_type": source.get("cargo_type") or row.cargo_type,
+                    "container_size": source.get("container_size") or row.container_size,
+                    "seal_number": source.get("seal_number") or row.seal_number,
+                    "bl_number": source.get("bl_number") or row.bl_number,
+                    "cargo_route": source.get("cargo_route") or row.cargo_route,
+                    "net_weight": source.get("net_weight") or row.weight or 0,
+                    "number_of_packages": source.get("number_of_packages")
+                    or row.number_of_package
+                    or 0,
+                    "container_number": source.get("container_number")
+                    or row.container_number,
+                    "service_item": source.get("service_item") or "Transportation Service",
+                    "currency": source.get("currency")
+                    or frappe.defaults.get_user_default("Currency")
+                    or "USD",
+                    "rate": source.get("rate") or 0,
+                    "cargo_location_country": source.get("cargo_location_country")
+                    or row.cargo_location_country,
+                    "cargo_location_city": source.get("cargo_location_city")
+                    or row.cargo_loading_city,
+                    "loading_date": source.get("loading_date")
+                    or row.expected_loading_date,
+                    "cargo_destination_country": source.get("cargo_destination_country")
+                    or row.cargo_destination_country,
+                    "cargo_destination_city": source.get("cargo_destination_city")
+                    or row.cargo_destination_city,
+                    "expected_offloading_date": source.get("expected_offloading_date")
+                    or row.expected_offloading_date,
+                    "manifest_number": self.name,
+                },
+            )
+
+        if not cargo_registration.cargo_details:
+            frappe.throw(
+                "Unable to create Cargo Registration because no valid source Cargo Detail rows were matched."
+            )
+
+        cargo_registration.insert(ignore_permissions=True)
+        self.db_set("cargo_registration", cargo_registration.name, update_modified=False)
+
+    def get_source_cargo_details(self):
+        cargo_ids = [d.cargo_id for d in self.manifest_cargo_details if d.cargo_id]
+        if not cargo_ids:
+            return {}
+
+        cargo_ids = list(dict.fromkeys(cargo_ids))
+
+        source_details = frappe.get_all(
+            "Cargo Detail",
+            filters={"name": ["in", cargo_ids]},
+            fields=[
+                "name",
+                "parent",
+                "cargo_id",
+                "cargo_type",
+                "container_size",
+                "seal_number",
+                "bl_number",
+                "cargo_route",
+                "net_weight",
+                "number_of_packages",
+                "container_number",
+                "service_item",
+                "currency",
+                "rate",
+                "cargo_location_country",
+                "cargo_location_city",
+                "loading_date",
+                "cargo_destination_country",
+                "cargo_destination_city",
+                "expected_offloading_date",
+            ],
+        )
+
+        by_name = {}
+        for d in source_details:
+            by_name[d.name] = d
+            if d.get("cargo_id"):
+                by_name[d.get("cargo_id")] = d
+
+        parent_names = list({d.parent for d in source_details if d.parent})
+
+        parent_map = {}
+        if parent_names:
+            parents = frappe.get_all(
+                "Cargo Registration",
+                filters={"name": ["in", parent_names]},
+                fields=["name", "customer", "company"],
+            )
+            parent_map = {p.name: p for p in parents}
+
+        for d in by_name.values():
+            parent_info = parent_map.get(d.parent, {})
+            d["parent_customer"] = parent_info.get("customer")
+            d["parent_company"] = parent_info.get("company")
+
+        return by_name
 
     def cargo_allocation(self):
         if self.transporter_type == "Sub-Contractor":

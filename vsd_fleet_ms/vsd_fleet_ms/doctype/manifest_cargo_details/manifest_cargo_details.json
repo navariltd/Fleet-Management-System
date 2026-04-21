@@ -193,13 +193,15 @@
    "fieldname": "service_item",
    "fieldtype": "Link",
    "label": "Service Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_qryk",
@@ -208,13 +210,15 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "label": "Rate"
+   "label": "Rate",
+   "non_negative": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-21 08:42:12.953434",
+ "modified": "2026-04-21 08:44:52.528424",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Manifest Cargo Details",

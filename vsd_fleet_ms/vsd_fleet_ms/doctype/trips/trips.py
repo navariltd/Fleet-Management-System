@@ -26,8 +26,8 @@ class Trips(Document):
         if self.transporter_type == "In House" and require_stock_out:
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
-        self.update_truck_status()    
-    
+        self.update_truck_status()
+
     def update_truck_status(self):
         frappe.db.set_value(
                 "Truck",
@@ -35,7 +35,7 @@ class Trips(Document):
                 {"status": "On Trip", "trans_ms_current_trip": self.name},
             )
         frappe.db.commit()
-    
+
 
     def onload(self):
 
@@ -57,7 +57,7 @@ class Trips(Document):
     def validate(self):
         if self.transporter_type == "In House":
             self.validate_fuel_requests()
-        
+
         # self.set_permits()
 
     def set_fuel_stock(self):
@@ -203,14 +203,14 @@ class Trips(Document):
         for row in self.fuel_request_history:
             if row.status not in  ["Rejected", "Approved"]:
                 frappe.throw("<b>All fuel requests must be on either approved or rejected before submitting the trip</b>")
-            
+
             if row.status == "Approved" and not row.purchase_order and require_fuel_purchase_order:
                 frappe.throw("<b>All approved fuel requests must have Purchase Order before submitting the trip</b>")
-        
+
         for row in self.requested_fund_accounts_table:
             if row.request_status not in  ["Rejected", "Approved"]:
                 frappe.throw("<b>All fund requests must be on either approved or rejected before submitting the trip</b>")
-            
+
             if row.request_status == "Approved" and not row.journal_entry:
                 frappe.throw("<b>All approved fund requests must have a Journal Entry before submitting the trip</b>")
 
@@ -234,7 +234,7 @@ def create_vehicle_trip_from_manifest(args_array):
                     row.created_trip = vehicle_trip.name
                     cargo_registration.save()
                     break
-        
+
         if args_dict.get("transporter_type") == "In House":
             funds_args = {
                 "reference_doctype": "Trips",
@@ -245,7 +245,7 @@ def create_vehicle_trip_from_manifest(args_array):
                 "trip_route": args_dict.get("trip_route")
             }
             request_funds(**funds_args)
-        
+
     return vehicle_trip.as_dict()
 
 @frappe.whitelist()
@@ -259,7 +259,7 @@ def create_fund_jl(doc, row):
         frappe.throw("Fund Request is not Approved")
 
     accounts = []
-    
+
     company_currency = frappe.db.get_value(
         "Company",
         doc.company,
@@ -314,7 +314,7 @@ def create_fund_jl(doc, row):
         date = row.requested_date
     else:
         date = nowdate()
-        
+
     jv_doc = frappe.get_doc(
         dict(
             doctype="Journal Entry",
@@ -501,7 +501,7 @@ def create_resumption_trip(docname):
             "trip_id":new_trip.name
             })
         round_trip.save()
-        
+
     old_trip.resumption_trip = new_trip.name
     old_trip.status = "Re-Assigned"
     old_trip.save()

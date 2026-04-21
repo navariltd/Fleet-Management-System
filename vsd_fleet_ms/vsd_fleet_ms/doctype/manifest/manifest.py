@@ -241,6 +241,92 @@ def create_manifest_from_cargo_registration(args_array):
 
 
 @frappe.whitelist()
+def create_cargo_registration_from_manifest(manifest_name):
+    manifest = frappe.get_doc("Manifest", manifest_name)
+
+    if manifest.docstatus != 1:
+        frappe.throw("Cargo Registration can only be created from a submitted Manifest.")
+
+    default_cargo_route = manifest.route or None
+
+    if manifest.cargo_registration:
+        frappe.throw("This Manifest already has a linked Cargo Registration.")
+
+    if not manifest.customer:
+        frappe.throw("Please set Customer on the Manifest before creating Cargo Registration.")
+
+    if not manifest.manifest_cargo_details:
+        frappe.throw("Please add at least one cargo row on the Manifest.")
+
+    cargo_registration = frappe.new_doc("Cargo Registration")
+    cargo_registration.customer = manifest.customer
+    cargo_registration.posting_date = manifest.posting_date or datetime.date.today()
+
+    company = frappe.defaults.get_user_default("Company") or frappe.defaults.get_global_default(
+        "company"
+    )
+    if company:
+        cargo_registration.company = company
+
+    for row in manifest.manifest_cargo_details:
+        missing_fields = []
+        if not row.cargo_route and not default_cargo_route:
+            missing_fields.append("cargo_route")
+        if not row.number_of_package:
+            missing_fields.append("number_of_package")
+        if not row.weight:
+            missing_fields.append("weight")
+        if not row.cargo_location_country:
+            missing_fields.append("cargo_location_country")
+        if not row.cargo_loading_city:
+            missing_fields.append("cargo_loading_city")
+        if not row.cargo_destination_country:
+            missing_fields.append("cargo_destination_country")
+        if not row.cargo_destination_city:
+            missing_fields.append("cargo_destination_city")
+        if not row.expected_loading_date:
+            missing_fields.append("expected_loading_date")
+        if not row.expected_offloading_date:
+            missing_fields.append("expected_offloading_date")
+
+        if missing_fields:
+            frappe.throw(
+                f"Manifest Cargo Details row {row.idx} is missing required values: "
+                f"{', '.join(missing_fields)}"
+            )
+
+        cargo_registration.append(
+            "cargo_details",
+            {
+                "cargo_id": row.cargo_id,
+                "cargo_type": row.cargo_type,
+                "container_size": row.container_size or "Loose",
+                "seal_number": row.seal_number,
+                "bl_number": row.bl_number,
+                "cargo_route": row.cargo_route or default_cargo_route,
+                "net_weight": row.weight,
+                "number_of_packages": row.number_of_package,
+                "container_number": row.container_number,
+                "service_item": "Transportation Service",
+                "currency": frappe.defaults.get_user_default("Currency") or "USD",
+                "rate": getattr(row, "rate", 0) or 0,
+                "cargo_location_country": row.cargo_location_country,
+                "cargo_location_city": row.cargo_loading_city,
+                "loading_date": row.expected_loading_date,
+                "cargo_destination_country": row.cargo_destination_country,
+                "cargo_destination_city": row.cargo_destination_city,
+                "expected_offloading_date": row.expected_offloading_date,
+                "manifest_number": manifest.name,
+            },
+        )
+
+    cargo_registration.insert(ignore_permissions=True)
+    manifest.db_set("cargo_registration", cargo_registration.name, update_modified=False)
+
+    return cargo_registration.as_dict()
+
+
+@frappe.whitelist()
 def add_to_existing_manifest(args_array):
     args_dict = json.loads(args_array)
     manifest = frappe.get_doc("Manifest", args_dict.get("manifest"))

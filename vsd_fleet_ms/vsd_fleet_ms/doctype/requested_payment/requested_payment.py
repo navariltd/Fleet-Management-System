@@ -191,8 +191,8 @@ def get_outstanding_payments(self, account_currency):
                     due_date = request.requested_date
 
     paid_amount = frappe.db.sql(
-        """SELECT (CASE WHEN SUM(debit_in_account_currency) > 0 THEN SUM(debit_in_account_currency) ELSE 0 END) AS paid_amount 
-					FROM `tabGL Entry` WHERE debit_in_account_currency > 0 AND account_currency = %s 
+        """SELECT (CASE WHEN SUM(debit_in_account_currency) > 0 THEN SUM(debit_in_account_currency) ELSE 0 END) AS paid_amount
+					FROM `tabGL Entry` WHERE debit_in_account_currency > 0 AND account_currency = %s
 						AND voucher_type = 'Requested Payment' AND voucher = %s""",
         (account_currency, self.name),
         as_dict=True,
@@ -658,7 +658,7 @@ def delete_gl_entries(
 
 def update_payment_status(doc):
     paid_amount = frappe.db.sql(
-        """select ifnull(sum(debit_in_account_currency), 0) as amt 
+        """select ifnull(sum(debit_in_account_currency), 0) as amt
 		from `tabGL Entry` where against_voucher_type = 'Requested Payment' and against_voucher = %s AND voucher_type <> 'Requested Payment'""",
         (doc.name),
         as_dict=1,
@@ -718,6 +718,41 @@ def make_payment(source_name, target_doc=None, ignore_permissions=False):
     pe.allocate_payment_amount = 1
 
     return pe
+
+
+@frappe.whitelist()
+def disburse_funds_for_trip_requests(requested_payment_name):
+    from vsd_fleet_ms.vsd_fleet_ms.doctype.trips.trips import create_fund_jl
+
+    requested_payment = frappe.get_doc("Requested Payment", requested_payment_name)
+
+    if requested_payment.reference_doctype != "Trips":
+        frappe.throw(_("Disbursement is only supported for Requested Payments linked to Trips."))
+
+    trips_doc = frappe.get_doc("Trips", requested_payment.reference_docname)
+    disbursed_rows = 0
+    skipped_rows = 0
+
+    for row in trips_doc.requested_fund_accounts_table:
+        if row.request_status == "Approved" and not row.journal_entry:
+            # Use frappe.as_json() to properly serialize datetime objects
+            create_fund_jl(frappe.as_json(trips_doc.as_dict()), frappe.as_json(row.as_dict()))
+            disbursed_rows += 1
+        else:
+            skipped_rows += 1
+
+    if disbursed_rows == 0:
+        return {
+            "message": _("No approved rows were pending disbursement."),
+            "disbursed": disbursed_rows,
+            "skipped": skipped_rows,
+        }
+
+    return {
+        "message": _("Created {0} Journal Entry(ies).".format(disbursed_rows)),
+        "disbursed": disbursed_rows,
+        "skipped": skipped_rows,
+    }
 
 
 @frappe.whitelist(allow_guest=True)

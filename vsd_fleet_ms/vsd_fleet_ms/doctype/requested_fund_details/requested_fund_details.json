@@ -7,7 +7,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "disburse_funds",
   "journal_entry",
   "section_break_oel6s",
   "requested_date",
@@ -54,12 +53,6 @@
   "approved_date"
  ],
  "fields": [
-  {
-   "depends_on": "eval:!doc.journal_entry && doc.request_status == \"Approved\"",
-   "fieldname": "disburse_funds",
-   "fieldtype": "Button",
-   "label": "Disburse Funds"
-  },
   {
    "fieldname": "section_break_oel6s",
    "fieldtype": "Section Break"
@@ -342,13 +335,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-13 12:54:27.296366",
+ "modified": "2026-04-23 13:28:28.406596",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Requested Fund Details",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

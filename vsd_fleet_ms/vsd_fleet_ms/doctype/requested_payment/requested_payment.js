@@ -174,7 +174,10 @@ frappe.ui.form.on("Requested Payment", {
       frm.events.make_payment();
     });
     //Disburse Funds button (only for Trips)
-    if (frm.doc.reference_doctype == "Trips") {
+    if (
+      frm.doc.reference_doctype == "Trips" &&
+      frm.doc.approval_status == "Processed"
+    ) {
       frm.add_custom_button(__("Disburse Funds"), function () {
         frm.events.disburse_funds(frm);
       });

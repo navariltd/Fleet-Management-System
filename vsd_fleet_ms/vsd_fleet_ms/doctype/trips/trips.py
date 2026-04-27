@@ -200,6 +200,8 @@ class Trips(Document):
 
     def validate_request_status(self):
         require_fuel_purchase_order = frappe.db.get_single_value("Transport Settings", "require_fuel_purchase_order")
+        require_fund_request_approval = frappe.db.get_single_value("Transport Settings", "require_fund_request_approval")
+
         for row in self.fuel_request_history:
             if row.status not in  ["Rejected", "Approved"]:
                 frappe.throw("<b>All fuel requests must be on either approved or rejected before submitting the trip</b>")
@@ -207,12 +209,13 @@ class Trips(Document):
             if row.status == "Approved" and not row.purchase_order and require_fuel_purchase_order:
                 frappe.throw("<b>All approved fuel requests must have Purchase Order before submitting the trip</b>")
 
-        for row in self.requested_fund_accounts_table:
-            if row.request_status not in  ["Rejected", "Approved"]:
-                frappe.throw("<b>All fund requests must be on either approved or rejected before submitting the trip</b>")
+        if require_fund_request_approval:
+            for row in self.requested_fund_accounts_table:
+                if row.request_status not in  ["Rejected", "Approved"]:
+                    frappe.throw("<b>All fund requests must be on either approved or rejected before submitting the trip</b>")
 
-            if row.request_status == "Approved" and not row.journal_entry:
-                frappe.throw("<b>All approved fund requests must have a Journal Entry before submitting the trip</b>")
+                if row.request_status == "Approved" and not row.journal_entry:
+                    frappe.throw("<b>All approved fund requests must have a Journal Entry before submitting the trip</b>")
 
 
 @frappe.whitelist()

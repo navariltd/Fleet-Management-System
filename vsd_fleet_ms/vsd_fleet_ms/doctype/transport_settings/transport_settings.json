@@ -18,6 +18,7 @@
   "require_fuel_purchase_order",
   "enable_cargo_invoicing",
   "require_fund_request_approval",
+  "automatically_submit_created_journal_entries",
   "accounting_dimension_section",
   "accounting_dimension"
  ],
@@ -101,12 +102,19 @@
    "fieldname": "require_fund_request_approval",
    "fieldtype": "Check",
    "label": "Require Fund Request Approval"
+  },
+  {
+   "default": "1",
+   "description": "Submit Journal Entry documents created when disbursing or requesting funds.",
+   "fieldname": "automatically_submit_created_journal_entries",
+   "fieldtype": "Check",
+   "label": "Automatically Submit Created Journal Entries"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-27 23:42:04.331716",
+ "modified": "2026-05-04 07:19:33.725918",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Transport Settings",

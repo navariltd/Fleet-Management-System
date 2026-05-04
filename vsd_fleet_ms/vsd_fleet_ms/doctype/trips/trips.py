@@ -255,6 +255,7 @@ def create_vehicle_trip_from_manifest(args_array):
 def create_fund_jl(doc, row):
     doc = frappe.get_doc(json.loads(doc))
     row = frappe._dict(json.loads(row))
+    auto_submit_journal_entry = frappe.db.get_single_value("Transport Settings", "automatically_submit_created_journal_entries")
     if row.journal_entry:
         frappe.throw("Journal Entry Already Created")
 
@@ -334,6 +335,8 @@ def create_fund_jl(doc, row):
     for account_row in jv_doc.accounts:
         set_dimension(doc, jv_doc, tr_child=account_row)
     jv_doc.save()
+    if auto_submit_journal_entry:
+        jv_doc.submit()
     jv_url = frappe.utils.get_url_to_form(jv_doc.doctype, jv_doc.name)
     si_msgprint = "Journal Entry Created <a href='{0}'>{1}</a>".format(
         jv_url, jv_doc.name

@@ -32,6 +32,8 @@ class Manifest(Document):
         self.assign_missing_manifest_cargo_ids()
         self.validate_transporter_type()
         self.validate_has_trailers()
+        self.sync_manifest_customer_to_child_rows()
+
         if self.name:
             self.update_cargo_registration_details()
             self.update_trips()
@@ -40,6 +42,13 @@ class Manifest(Document):
         for row in self.manifest_cargo_details or []:
             if not row.cargo_id:
                 row.cargo_id = self.generate_manifest_cargo_id(row.cargo_type)
+
+    def sync_manifest_customer_to_child_rows(self):
+        if not self.customer:
+            return
+        for row in self.manifest_cargo_details or []:
+            if not row.customer_name:
+                row.customer_name = self.customer
 
     def generate_manifest_cargo_id(self, cargo_type):
         safe_cargo_type = (cargo_type or "CARGO").strip().replace("/", "-")

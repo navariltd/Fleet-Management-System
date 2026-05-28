@@ -13,7 +13,9 @@ from frappe import _
 from frappe.model.document import Document
 from vsd_fleet_ms.utils.dimension import set_dimension
 from erpnext.setup.utils import get_exchange_rate
-from vsd_fleet_ms.vsd_fleet_ms.doctype.requested_payment.requested_payment import request_funds
+from vsd_fleet_ms.vsd_fleet_ms.doctype.requested_payment.requested_payment import (
+    request_funds,
+)
 
 
 class Trips(Document):
@@ -22,20 +24,22 @@ class Trips(Document):
         self.validate_request_status()
 
     def on_submit(self):
-        require_stock_out = frappe.db.get_single_value("Transport Settings", "require_stock_out_entry")
+        require_stock_out = frappe.db.get_single_value(
+            "Transport Settings", "require_stock_out_entry"
+        )
         if self.transporter_type == "In House" and require_stock_out:
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
         self.update_truck_status()
+        self.update_manifest_trip_status("Completed")
 
     def update_truck_status(self):
         frappe.db.set_value(
-                "Truck",
-                self.truck_number,
-                {"status": "On Trip", "trans_ms_current_trip": self.name},
-            )
+            "Truck",
+            self.truck_number,
+            {"status": "On Trip", "trans_ms_current_trip": self.name},
+        )
         frappe.db.commit()
-
 
     def onload(self):
 
@@ -55,6 +59,7 @@ class Trips(Document):
             self.requested_fund_accounts_table = []
 
     def validate(self):
+        self.set_load_quantity_difference()
         if self.transporter_type == "In House":
             self.validate_fuel_requests()
 
@@ -68,12 +73,17 @@ class Trips(Document):
         if len(reference_route.trip_steps) > 0:
             self.main_route_steps = []
             for row in reference_route.trip_steps:
+                if not row.location_type:
+                    frappe.throw(
+                        _(
+                            "Trip Route {0} has a route step with no Location Type. Please update the route before creating a Vehicle Trip."
+                        ).format(reference_route.name)
+                    )
                 new_row = self.append("main_route_steps", {})
                 new_row.location = row.location
                 new_row.distance = row.distance
                 new_row.fuel_consumption_qty = row.fuel_consumption_qty
                 new_row.location_type = row.location_type
-
 
     def set_expenses(self):
         # reference_doc = frappe.get_doc(self.reference_doctype, self.reference_docname)
@@ -83,8 +93,12 @@ class Trips(Document):
             self.requested_fund_accounts_table = []
             for row in reference_route.fixed_expenses:
                 fixed_expense_doc = frappe.get_doc("Fixed Expenses", row.expense)
-                expense_account_doc = frappe.get_doc("Account", fixed_expense_doc.expense_account)
-                payable_account_currency_doc = frappe.get_doc("Account", fixed_expense_doc.cash_bank_account)
+                expense_account_doc = frappe.get_doc(
+                    "Account", fixed_expense_doc.expense_account
+                )
+                payable_account_currency_doc = frappe.get_doc(
+                    "Account", fixed_expense_doc.cash_bank_account
+                )
                 aday = nowdate()
                 new_row = self.append("requested_fund_accounts_table", {})
                 new_row.requested_date = aday
@@ -94,7 +108,9 @@ class Trips(Document):
                 new_row.expense_type = row.expense
                 new_row.expense_account = fixed_expense_doc.expense_account
                 new_row.expense_account_currency = expense_account_doc.account_currency
-                new_row.payable_account_currency = payable_account_currency_doc.account_currency
+                new_row.payable_account_currency = (
+                    payable_account_currency_doc.account_currency
+                )
                 new_row.payable_account = fixed_expense_doc.cash_bank_account
                 new_row.party_type = row.party_type
                 new_row.requested_by = frappe.session.user
@@ -109,7 +125,9 @@ class Trips(Document):
         if self.transporter_type == "In House":
             if not self.assigned_driver:
                 frappe.throw("Driver is not set")
-            employee = frappe.db.get_value("Truck Driver", self.assigned_driver, "employee")
+            employee = frappe.db.get_value(
+                "Truck Driver", self.assigned_driver, "employee"
+            )
         elif self.transporter_type == "Sub-Contractor":
             if not self.sub_contactor_driver_name:
                 frappe.throw("Driver Name is not set")
@@ -120,16 +138,21 @@ class Trips(Document):
                 if employee:
                     row.party = employee
 
-    # def set_permits(self):
-    #     if self.main_cargo_category and not len(self.trip_permits):
-    #         self.trip_permits = []
-    #         cargo_category = frappe.get_doc(
-    #             "Cargo Types", self.main_cargo_category
-    #         )
-    #         for row in cargo_category.permits:
-    #             new_row = self.append("trip_permits", {})
-    #             new_row.permit_name = row.permit_name
-    #             new_row.mandatory = row.mandatory
+    def set_load_quantity_difference(self):
+        loaded_quantity = 0
+        offloaded_quantity = 0
+
+        for step in self.get("main_route_steps") or []:
+            if step.location_type == "Loading Point" and step.load_qty is not None:
+                loaded_quantity = step.load_qty
+            if step.location_type == "Offloading Point" and step.load_qty is not None:
+                offloaded_quantity = step.load_qty
+
+        self.load_quantity_difference = offloaded_quantity - loaded_quantity
+
+    def update_manifest_trip_status(self, status):
+        if self.manifest:
+            frappe.db.set_value("Manifest", self.manifest, "transport_status", status)
 
     def before_save(self):
         if not self.date:
@@ -144,7 +167,6 @@ class Trips(Document):
         for request in self.get("fuel_request_history"):
             if request.status == "Open":
                 make_request = True
-
 
         if make_request:
             existing_fuel_request = frappe.db.get_value(
@@ -184,7 +206,6 @@ class Trips(Document):
                     request.set("status", "Requested")
                     request.set("transaction_date", nowdate())
 
-
     def validate_main_route_inputs(self):
         loading_date = None
         offloading_date = None
@@ -203,11 +224,19 @@ class Trips(Document):
         require_fund_request_approval = frappe.db.get_single_value("Transport Settings", "require_fund_request_approval")
 
         for row in self.fuel_request_history:
-            if row.status not in  ["Rejected", "Approved"]:
-                frappe.throw("<b>All fuel requests must be on either approved or rejected before submitting the trip</b>")
+            if row.status not in ["Rejected", "Approved"]:
+                frappe.throw(
+                    "<b>All fuel requests must be on either approved or rejected before submitting the trip</b>"
+                )
 
-            if row.status == "Approved" and not row.purchase_order and require_fuel_purchase_order:
-                frappe.throw("<b>All approved fuel requests must have Purchase Order before submitting the trip</b>")
+            if (
+                row.status == "Approved"
+                and not row.purchase_order
+                and require_fuel_purchase_order
+            ):
+                frappe.throw(
+                    "<b>All approved fuel requests must have Purchase Order before submitting the trip</b>"
+                )
 
         if require_fund_request_approval:
             for row in self.requested_fund_accounts_table:
@@ -224,14 +253,19 @@ def create_vehicle_trip_from_manifest(args_array):
     manifest = frappe.get_doc("Manifest", args_dict.get("manifest_name"))
     vehicle_trip = frappe.new_doc("Trips")
     vehicle_trip.manifest = args_dict.get("manifest_name")
+    vehicle_trip.route = args_dict.get("trip_route") or manifest.route
     vehicle_trip.transporter_type = args_dict.get("transporter_type")
-    vehicle_trip.cargo_registration = manifest.cargo_registration if manifest.cargo_registration else ""
+    vehicle_trip.cargo_registration = (
+        manifest.cargo_registration if manifest.cargo_registration else ""
+    )
     if vehicle_trip.save():
         manifest.vehicle_trip = vehicle_trip.name
         manifest.save()
-        cargos = frappe.get_all("Cargo Detail", filters={"manifest_number":manifest.name}, fields="*")
+        cargos = frappe.get_all(
+            "Cargo Detail", filters={"manifest_number": manifest.name}, fields="*"
+        )
         for cargo in cargos:
-            cargo_registration = frappe.get_doc("Cargo Registration", cargo.parent )
+            cargo_registration = frappe.get_doc("Cargo Registration", cargo.parent)
             for row in cargo_registration.cargo_details:
                 if row.manifest_number == manifest.name:
                     row.created_trip = vehicle_trip.name
@@ -245,11 +279,12 @@ def create_vehicle_trip_from_manifest(args_array):
                 "manifest": args_dict.get("manifest_name"),
                 "truck": args_dict.get("truck"),
                 "truck_driver": args_dict.get("driver"),
-                "trip_route": args_dict.get("trip_route")
+                "trip_route": args_dict.get("trip_route"),
             }
             request_funds(**funds_args)
 
     return vehicle_trip.as_dict()
+
 
 @frappe.whitelist()
 def create_fund_jl(doc, row):
@@ -345,6 +380,7 @@ def create_fund_jl(doc, row):
     frappe.set_value(row.doctype, row.name, "journal_entry", jv_doc.name)
     return jv_doc
 
+
 @frappe.whitelist()
 def make_vehicle_inspection(source_name, target_doc=None, ignore_permissions=False):
 
@@ -377,9 +413,7 @@ def check_trip_status(**args):
     args = frappe._dict(args)
     frappe.msgprint("ok")
 
-    existing_trip = frappe.db.get_value(
-        "Trips", {"main_file_number": args.file_number}
-    )
+    existing_trip = frappe.db.get_value("Trips", {"main_file_number": args.file_number})
     if existing_trip:
         doc = frappe.get_doc("Trips", existing_trip)
         status = doc.status
@@ -394,6 +428,7 @@ def check_trip_status(**args):
         frappe.msgprint(
             "Cannot Close because Trip has not been created yet for the current file"
         )
+
 
 @frappe.whitelist()
 def create_stock_out_entry(doc, fuel_stock_out):
@@ -469,6 +504,7 @@ def create_purchase_order(request_doc, item):
     frappe.set_value(item.doctype, item.name, "purchase_order", doc.name)
     return doc.name
 
+
 @frappe.whitelist()
 def create_breakdown(docname):
     trip = frappe.get_doc("Trips", docname)
@@ -477,6 +513,7 @@ def create_breakdown(docname):
     trip.breakdown_date = now()
     trip.save()
     return "successful"
+
 
 @frappe.whitelist()
 def create_resumption_trip(docname):
@@ -498,19 +535,15 @@ def create_resumption_trip(docname):
             "manifest": new_trip.manifest,
             "truck": new_trip.truck_number,
             "truck_driver": new_trip.assigned_driver,
-            "trip_route": new_trip.route
-            }
+            "trip_route": new_trip.route,
+        }
         request_funds(**funds_args)
     if new_trip.round_trip:
-        round_trip = frappe.get_doc("Round Trip",new_trip.round_trip)
-        round_trip.append("trip_details",{
-            "trip_id":new_trip.name
-            })
+        round_trip = frappe.get_doc("Round Trip", new_trip.round_trip)
+        round_trip.append("trip_details", {"trip_id": new_trip.name})
         round_trip.save()
 
     old_trip.resumption_trip = new_trip.name
     old_trip.status = "Re-Assigned"
     old_trip.save()
     return new_trip.as_dict()
-
-

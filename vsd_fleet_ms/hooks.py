@@ -206,9 +206,9 @@ fixtures = [
         "doctype": "Custom Field",
         "filters": [
             [
-                "name",
+                "module",
                 "in",
-                ("Cargo Detail-custom_bill_on_weight",),
+                "VSD Fleet MS",
             ]
         ],
     },

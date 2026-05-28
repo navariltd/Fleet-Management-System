@@ -27,6 +27,7 @@ class Trips(Document):
             if not self.stock_out_entry:
                 frappe.throw(_("Stock Out Entry is not set"))
         self.update_truck_status()
+        self.update_manifest_trip_status("Completed")
 
     def update_truck_status(self):
         frappe.db.set_value(
@@ -132,6 +133,10 @@ class Trips(Document):
                 offloaded_quantity = step.load_qty
 
         self.load_quantity_difference = offloaded_quantity - loaded_quantity
+
+    def update_manifest_trip_status(self, status):
+        if self.manifest:
+            frappe.db.set_value("Manifest", self.manifest, "transport_status", status)
 
     def before_save(self):
         if not self.date:

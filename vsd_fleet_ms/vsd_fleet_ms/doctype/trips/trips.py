@@ -220,9 +220,9 @@ class Trips(Document):
             frappe.throw("Loading Date must be set before Offloading Date")
 
     def validate_request_status(self):
-        require_fuel_purchase_order = frappe.db.get_single_value(
-            "Transport Settings", "require_fuel_purchase_order"
-        )
+        require_fuel_purchase_order = frappe.db.get_single_value("Transport Settings", "require_fuel_purchase_order")
+        require_fund_request_approval = frappe.db.get_single_value("Transport Settings", "require_fund_request_approval")
+
         for row in self.fuel_request_history:
             if row.status not in ["Rejected", "Approved"]:
                 frappe.throw(
@@ -238,16 +238,13 @@ class Trips(Document):
                     "<b>All approved fuel requests must have Purchase Order before submitting the trip</b>"
                 )
 
-        for row in self.requested_fund_accounts_table:
-            if row.request_status not in ["Rejected", "Approved"]:
-                frappe.throw(
-                    "<b>All fund requests must be on either approved or rejected before submitting the trip</b>"
-                )
+        if require_fund_request_approval:
+            for row in self.requested_fund_accounts_table:
+                if row.request_status not in  ["Rejected", "Approved"]:
+                    frappe.throw("<b>All fund requests must be on either approved or rejected before submitting the trip</b>")
 
-            if row.request_status == "Approved" and not row.journal_entry:
-                frappe.throw(
-                    "<b>All approved fund requests must have a Journal Entry before submitting the trip</b>"
-                )
+                if row.request_status == "Approved" and not row.journal_entry:
+                    frappe.throw("<b>All approved fund requests must have a Journal Entry before submitting the trip</b>")
 
 
 @frappe.whitelist()
@@ -293,6 +290,7 @@ def create_vehicle_trip_from_manifest(args_array):
 def create_fund_jl(doc, row):
     doc = frappe.get_doc(json.loads(doc))
     row = frappe._dict(json.loads(row))
+    auto_submit_journal_entry = frappe.db.get_single_value("Transport Settings", "automatically_submit_created_journal_entries")
     if row.journal_entry:
         frappe.throw("Journal Entry Already Created")
 
@@ -372,6 +370,8 @@ def create_fund_jl(doc, row):
     for account_row in jv_doc.accounts:
         set_dimension(doc, jv_doc, tr_child=account_row)
     jv_doc.save()
+    if auto_submit_journal_entry:
+        jv_doc.submit()
     jv_url = frappe.utils.get_url_to_form(jv_doc.doctype, jv_doc.name)
     si_msgprint = "Journal Entry Created <a href='{0}'>{1}</a>".format(
         jv_url, jv_doc.name

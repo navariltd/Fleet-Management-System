@@ -48,6 +48,8 @@
   "total_distance",
   "column_break_g36mb",
   "total_fuel",
+  "column_break_qifj",
+  "load_quantity_difference",
   "side_trips_tab",
   "side_trips",
   "location_update_tab",
@@ -647,13 +649,23 @@
    "label": "Source Cargo Registration",
    "options": "Cargo Registration",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qifj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Qty Offloaded - Qty Loaded",
+   "fieldname": "load_quantity_difference",
+   "fieldtype": "Float",
+   "label": "Load Quantity Difference"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 19:14:10.574930",
+ "modified": "2026-05-28 08:38:27.187610",
  "modified_by": "Administrator",
  "module": "VSD Fleet MS",
  "name": "Trips",

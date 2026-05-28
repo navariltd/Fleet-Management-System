@@ -55,6 +55,7 @@ class Trips(Document):
             self.requested_fund_accounts_table = []
 
     def validate(self):
+        self.set_load_quantity_difference()
         if self.transporter_type == "In House":
             self.validate_fuel_requests()
 
@@ -120,16 +121,17 @@ class Trips(Document):
                 if employee:
                     row.party = employee
 
-    # def set_permits(self):
-    #     if self.main_cargo_category and not len(self.trip_permits):
-    #         self.trip_permits = []
-    #         cargo_category = frappe.get_doc(
-    #             "Cargo Types", self.main_cargo_category
-    #         )
-    #         for row in cargo_category.permits:
-    #             new_row = self.append("trip_permits", {})
-    #             new_row.permit_name = row.permit_name
-    #             new_row.mandatory = row.mandatory
+    def set_load_quantity_difference(self):
+        loaded_quantity = 0
+        offloaded_quantity = 0
+
+        for step in self.get("main_route_steps") or []:
+            if step.location_type == "Loading Point" and step.load_qty is not None:
+                loaded_quantity = step.load_qty
+            if step.location_type == "Offloading Point" and step.load_qty is not None:
+                offloaded_quantity = step.load_qty
+
+        self.load_quantity_difference = offloaded_quantity - loaded_quantity
 
     def before_save(self):
         if not self.date:

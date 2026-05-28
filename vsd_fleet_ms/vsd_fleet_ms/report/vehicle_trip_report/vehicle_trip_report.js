@@ -48,5 +48,10 @@ frappe.query_reports["Vehicle Trip Report"] = {
       fieldtype: "Link",
       options: "Truck",
     },
+    {
+      fieldname: "delivery_note",
+      label: __("Delivery Note"),
+      fieldtype: "Data",
+    },
   ],
 };

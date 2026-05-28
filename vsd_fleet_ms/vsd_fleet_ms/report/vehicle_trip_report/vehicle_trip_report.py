@@ -96,6 +96,12 @@ def get_columns():
             "width": 120,
         },
         {
+            "fieldname": "delivery_note",
+            "label": "Delivery Note",
+            "fieldtype": "Data",
+            "width": 150,
+        },
+        {
             "fieldname": "customer",
             "label": "Customer",
             "fieldtype": "Link",
@@ -132,6 +138,7 @@ def get_data(filters):
 			rs.offloading_location,
 			rs.offloading_date,
 			rs.offloaded_weight,
+			t.custom_delivery_note AS delivery_note,
 			mcd.customer,
 			(COALESCE(rs.loaded_weight, 0) - COALESCE(rs.offloaded_weight, 0)) AS load_difference
 		FROM `tabTrips` t
@@ -234,5 +241,9 @@ def apply_filters(filters):
     if filters.get("truck_number"):
         conditions.append("t.truck_number = %(truck_number)s")
         values["truck_number"] = filters.get("truck_number")
+
+    if filters.get("delivery_note"):
+        conditions.append("t.custom_delivery_note = %(delivery_note)s")
+        values["delivery_note"] = filters.get("delivery_note")
 
     return " AND ".join(conditions), values

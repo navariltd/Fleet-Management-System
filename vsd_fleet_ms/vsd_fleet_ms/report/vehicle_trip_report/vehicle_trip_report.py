@@ -140,7 +140,7 @@ def get_data(filters):
 			rs.offloaded_weight,
 			t.custom_delivery_note AS delivery_note,
 			mcd.customer,
-			(COALESCE(rs.loaded_weight, 0) - COALESCE(rs.offloaded_weight, 0)) AS load_difference
+			(COALESCE(rs.offloaded_weight, 0) - COALESCE(rs.loaded_weight, 0)) AS load_difference
 		FROM `tabTrips` t
 		LEFT JOIN (
 			SELECT

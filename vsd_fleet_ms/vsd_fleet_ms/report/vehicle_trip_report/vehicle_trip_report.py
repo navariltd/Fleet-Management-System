@@ -28,7 +28,7 @@ def get_columns():
             "width": 150,
         },
         {
-            "fieldname": "trailer",
+            "fieldname": "trailer_1",
             "label": "Trailer",
             "fieldtype": "Link",
             "options": "Assigned Trailers",
@@ -72,7 +72,7 @@ def get_columns():
             "width": 120,
         },
         {
-            "fieldname": "approved_fuel",
+            "fieldname": "fuel_stock_out",
             "label": "Fuel",
             "fieldtype": "Data",
             "width": 120,
@@ -125,8 +125,9 @@ def get_data(filters):
         f"""
 		SELECT
 			t.name AS vehicle_trip,
+            t.fuel_stock_out,
 			t.truck_number,
-			COALESCE(at.name, '') AS trailer,
+            t.trailer_1,
 			t.driver_name,
 			rs.loading_date,
 			rs.loading_location,

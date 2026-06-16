@@ -34,7 +34,8 @@ frappe.query_reports["Vehicle Trip Report"] = {
     {
       fieldname: "driver_name",
       label: __("Driver"),
-      fieldtype: "Data",
+      fieldtype: "Link",
+      options: "Driver",
     },
     {
       fieldname: "trailer",

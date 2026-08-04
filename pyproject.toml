@@ -2,4 +2,18 @@
 name = "vsd_fleet_ms"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = []
+readme = "README.md"
+dynamic = ["version"]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+# These dependencies are only installed when developer mode is enabled
+[tool.bench.dev-dependencies]
+# package_name = "~=1.1.0"
+
+# Declares the Frappe releases supported by this app. Bench/Frappe Cloud reads
+# this table when selecting a compatible framework version during installation.
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0,<17.0.0"

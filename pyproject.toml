@@ -3,7 +3,6 @@ name = "vsd_fleet_ms"
 version = "0.1.0"
 requires-python = ">=3.11"
 readme = "README.md"
-dynamic = ["version"]
 
 [build-system]
 requires = ["flit_core >=3.4,<4"]

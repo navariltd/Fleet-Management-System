@@ -1,6 +1,7 @@
 [project]
 name = "vsd_fleet_ms"
 version = "0.1.0"
+description = "Fleet Management System for the Frappe Framework"
 requires-python = ">=3.11"
 readme = "README.md"
 
